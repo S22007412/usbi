@@ -9,11 +9,80 @@ let estudiantes = [];
 
 // Variables globales
 let currentPage = 'dashboard';
-let nextFolio = 1; // Reiniciado para comenzar desde el folio 0001
+let nextFolio = 1;
 let estadoChart = null;
 let ingresosChart = null;
 let currentEditIndex = -1;
 let currentDeleteIndex = -1;
+let isLoading = false;
+
+// API Helper Functions
+async function apiRequest(endpoint, method = 'GET', data = null) {
+    try {
+        const config = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        
+        if (data) {
+            config.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/${endpoint}`, config);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.error || `HTTP error! status: ${response.status}`);
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('API Request Error:', error);
+        throw error;
+    }
+}
+
+// Loading indicator functions
+function showLoading(message = 'Cargando...') {
+    isLoading = true;
+    // You can implement a loading spinner here
+    console.log(message);
+}
+
+function hideLoading() {
+    isLoading = false;
+    // Hide loading spinner
+}
+
+// Load students from database
+async function loadStudents() {
+    try {
+        showLoading('Cargando estudiantes...');
+        const response = await apiRequest('students');
+        estudiantes.length = 0; // Clear array
+        estudiantes.push(...response.data);
+        updateDashboardStats();
+        updateReportsStats();
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al cargar estudiantes: ' + error.message);
+        console.error('Error loading students:', error);
+    }
+}
+
+// Load statistics from database
+async function loadStatistics() {
+    try {
+        const response = await apiRequest('stats');
+        return response.data;
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        return null;
+    }
+}
 
 // Inicialización del sistema
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,8 +90,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeFormHandlers();
     initializeSearchHandlers();
     initializeModalHandlers();
-    updateDashboardStats();
-    updateReportsStats();
+    
+    // Load initial data
+    loadStudents();
     initializeCharts();
 });
 
@@ -125,7 +195,6 @@ function initializeFormHandlers() {
 }
 
 function updateCurrentFolio() {
-    // El folio ahora se actualiza dinámicamente en el resumen
     const folioElement = document.getElementById('current-folio');
     const nextAvailable = getNextAvailableFolio();
     
@@ -196,7 +265,9 @@ function updateResumen() {
     }
 }
 
-function registrarDevolucion() {
+async function registrarDevolucion() {
+    if (isLoading) return;
+
     const matricula = document.getElementById('matricula').value.trim();
     const nombre = document.getElementById('nombre').value.trim();
     const carrera = document.getElementById('carrera').value;
@@ -215,65 +286,42 @@ function registrarDevolucion() {
         return;
     }
 
-    // Determinar folio final
-    let folioFinal;
-    if (folioManual) {
-        folioFinal = formatFolio(folioManual);
+    try {
+        showLoading('Registrando devolución...');
+
+        const studentData = {
+            matricula: matricula,
+            nombre: nombre,
+            carrera: carrera,
+            adeudo: montoAdeudo,
+            folio: folioManual || null
+        };
+
+        const response = await apiRequest('students', 'POST', studentData);
         
-        // Validar formato de folio
-        if (folioFinal.length !== 4 || isNaN(parseInt(folioFinal))) {
-            alert('El folio debe ser un número de 4 dígitos (ej: 0001, 0123)');
-            return;
+        if (response.success) {
+            // Add to local array
+            estudiantes.push(response.data);
+            
+            // Limpiar formulario
+            clearForm();
+            
+            // Actualizar estadísticas
+            updateDashboardStats();
+            updateReportsStats();
+            
+            // Mostrar mensaje de éxito
+            showSuccessMessage(response.message, 'success');
+            
+            // Actualizar folio
+            updateCurrentFolio();
         }
         
-        // Validar folio único
-        if (!validateFolioUnique(folioFinal)) {
-            alert(`El folio ${folioFinal} ya existe. Por favor, use otro folio o déjelo vacío para asignación automática.`);
-            return;
-        }
-    } else {
-        folioFinal = getNextAvailableFolio();
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al registrar devolución: ' + error.message);
     }
-
-    // Crear nuevo registro con fecha y hora actual
-    const ahora = new Date();
-    const nuevoEstudiante = {
-        folio: `No.${folioFinal}`,
-        matricula: matricula,
-        nombre: nombre,
-        carrera: carrera,
-        adeudo: montoAdeudo,
-        estado: montoAdeudo > 0 ? 'con_adeudo' : 'sin_adeudo',
-        fechaRegistro: ahora.toISOString(),
-        horaRegistro: ahora.toLocaleTimeString('es-ES', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        })
-    };
-
-    // Agregar al array
-    estudiantes.push(nuevoEstudiante);
-
-    // Actualizar nextFolio para el próximo automático
-    const allFolios = estudiantes.map(e => parseInt(e.folio.replace('No.', '')));
-    nextFolio = Math.max(...allFolios) + 1;
-
-    // Limpiar formulario
-    clearForm();
-
-    // Actualizar estadísticas
-    updateDashboardStats();
-    updateReportsStats();
-
-    // Mostrar mensaje de éxito
-    showSuccessMessage(
-        `Devolución registrada exitosamente: ${nombre} (No.${folioFinal}) - Adeudo: $${montoAdeudo.toFixed(2)}`,
-        'success'
-    );
-
-    // Actualizar folio
-    updateCurrentFolio();
 }
 
 function clearForm() {
@@ -286,7 +334,7 @@ function clearForm() {
 }
 
 // Nueva función para regenerar folios
-function regenerarFolios() {
+async function regenerarFolios() {
     if (estudiantes.length === 0) {
         alert('No hay registros para regenerar folios');
         return;
@@ -302,25 +350,9 @@ function regenerarFolios() {
 
     if (!confirmacion) return;
 
-    // Regenerar folios secuencialmente
-    estudiantes.forEach((estudiante, index) => {
-        const nuevoFolio = String(index + 1).padStart(4, '0');
-        estudiante.folio = `No.${nuevoFolio}`;
-    });
-
-    // Actualizar nextFolio
-    nextFolio = estudiantes.length + 1;
-
-    // Actualizar estadísticas y tabla
-    updateDashboardStats();
-    updateReportsStats();
-    updateCurrentFolio();
-
-    // Mostrar mensaje de éxito
-    showSuccessMessage(
-        `✅ Folios regenerados exitosamente. ${estudiantes.length} registros renumerados secuencialmente.`,
-        'success'
-    );
+    // Note: This functionality would need to be implemented in the backend
+    // For now, we'll reload the data
+    showSuccessMessage('Funcionalidad de regeneración de folios pendiente de implementación en el backend', 'info');
 }
 
 // Búsqueda
@@ -348,22 +380,24 @@ function initializeSearchHandlers() {
     });
 }
 
-function realizarBusqueda() {
-    const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+async function realizarBusqueda() {
+    const searchTerm = document.getElementById('search-input').value.trim();
     
     if (!searchTerm) {
         alert('Por favor, ingrese un término de búsqueda');
         return;
     }
 
-    // Buscar en estudiantes
-    const results = estudiantes.filter(estudiante => {
-        return estudiante.folio.toLowerCase().includes(searchTerm) ||
-               estudiante.matricula.toLowerCase().includes(searchTerm) ||
-               estudiante.nombre.toLowerCase().includes(searchTerm);
-    });
-
-    displaySearchResults(results, searchTerm);
+    try {
+        showLoading('Buscando...');
+        const response = await apiRequest(`search?term=${encodeURIComponent(searchTerm)}`);
+        displaySearchResults(response.data, searchTerm);
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error en la búsqueda: ' + error.message);
+        displaySearchResults([], searchTerm);
+    }
 }
 
 function displaySearchResults(results, searchTerm) {
@@ -434,32 +468,49 @@ function updateDashboardStats() {
     document.getElementById('total-devoluciones').textContent = totalDevoluciones;
     document.getElementById('sin-adeudo').textContent = sinAdeudo;
     document.getElementById('con-adeudo').textContent = conAdeudo;
-    document.getElementById('ingresos').textContent = `$${ingresosTotales}`;
+    document.getElementById('ingresos').textContent = `$${ingresosTotales.toFixed(2)}`;
 
     // Actualizar tabla de estudiantes
     updateStudentsTable();
 }
 
-function updateReportsStats() {
-    const totalDevoluciones = estudiantes.length;
-    const conAdeudo = estudiantes.filter(e => e.estado === 'con_adeudo').length;
-    const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
-    const ingresosTotales = estudiantes.reduce((sum, e) => sum + e.adeudo, 0);
+async function updateReportsStats() {
+    try {
+        const stats = await loadStatistics();
+        if (stats) {
+            // Actualizar reportes con datos del servidor
+            document.getElementById('report-total').textContent = stats.general.totalDevoluciones;
+            document.getElementById('report-adeudos').textContent = stats.general.conAdeudo;
+            document.getElementById('report-tiempo').textContent = stats.general.sinAdeudo;
+            document.getElementById('report-ingresos').textContent = `$${stats.general.totalAdeudos.toFixed(2)}`;
+        } else {
+            // Fallback to local data
+            const totalDevoluciones = estudiantes.length;
+            const conAdeudo = estudiantes.filter(e => e.estado === 'con_adeudo').length;
+            const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
+            const ingresosTotales = estudiantes.reduce((sum, e) => sum + e.adeudo, 0);
 
-    // Actualizar reportes
-    document.getElementById('report-total').textContent = totalDevoluciones;
-    document.getElementById('report-adeudos').textContent = conAdeudo;
-    document.getElementById('report-tiempo').textContent = sinAdeudo;
-    document.getElementById('report-ingresos').textContent = `$${ingresosTotales}`;
+            document.getElementById('report-total').textContent = totalDevoluciones;
+            document.getElementById('report-adeudos').textContent = conAdeudo;
+            document.getElementById('report-tiempo').textContent = sinAdeudo;
+            document.getElementById('report-ingresos').textContent = `$${ingresosTotales.toFixed(2)}`;
+        }
+    } catch (error) {
+        console.error('Error updating reports stats:', error);
+    }
 }
 
 // Gráficos
-function initializeCharts() {
-    createEstadoChart();
-    createIngresosChart();
+async function initializeCharts() {
+    try {
+        await createEstadoChart();
+        await createIngresosChart();
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
 }
 
-function createEstadoChart() {
+async function createEstadoChart() {
     const ctx = document.getElementById('estadoChart');
     if (!ctx) return;
 
@@ -493,7 +544,7 @@ function createEstadoChart() {
     });
 }
 
-function createIngresosChart() {
+async function createIngresosChart() {
     const ctx = document.getElementById('ingresosChart');
     if (!ctx) return;
 
@@ -501,92 +552,137 @@ function createIngresosChart() {
         ingresosChart.destroy();
     }
 
-    // Todos los meses del año
-    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    // Calcular adeudos reales por mes basado en los datos de estudiantes
-    const adeudosPorMes = new Array(12).fill(0);
-    
-    // Si hay estudiantes, calcular adeudos por mes de registro
-    estudiantes.forEach(estudiante => {
-        if (estudiante.adeudo > 0 && estudiante.fechaRegistro) {
-            const fecha = new Date(estudiante.fechaRegistro);
-            const mes = fecha.getMonth(); // 0-11
-            adeudosPorMes[mes] += estudiante.adeudo;
+    try {
+        const stats = await loadStatistics();
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        let adeudosPorMes = new Array(12).fill(0);
+        
+        if (stats && stats.monthly) {
+            adeudosPorMes = stats.monthly;
+        } else if (estudiantes.length === 0) {
+            // Datos de ejemplo si no hay datos reales
+            const datosEjemplo = [120, 85, 150, 95, 200, 175, 90, 160, 110, 140, 185, 130];
+            adeudosPorMes = datosEjemplo;
+        } else {
+            // Calcular desde datos locales
+            estudiantes.forEach(estudiante => {
+                if (estudiante.adeudo > 0 && estudiante.fechaRegistro) {
+                    const fecha = new Date(estudiante.fechaRegistro);
+                    const mes = fecha.getMonth(); // 0-11
+                    adeudosPorMes[mes] += estudiante.adeudo;
+                }
+            });
         }
-    });
-    
-    // Si no hay datos reales, usar datos de ejemplo
-    if (estudiantes.length === 0) {
-        const datosEjemplo = [120, 85, 150, 95, 200, 175, 90, 160, 110, 140, 185, 130];
-        adeudosPorMes.splice(0, 12, ...datosEjemplo);
-    }
 
-    ingresosChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: meses,
-            datasets: [{
-                label: 'Adeudos ($)',
-                data: adeudosPorMes,
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#ef4444',
-                pointBorderColor: '#dc2626',
-                pointHoverBackgroundColor: '#dc2626',
-                pointHoverBorderColor: '#b91c1c'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
+        ingresosChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: meses,
+                datasets: [{
+                    label: 'Adeudos ($)',
+                    data: adeudosPorMes,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#dc2626',
+                    pointHoverBackgroundColor: '#dc2626',
+                    pointHoverBorderColor: '#b91c1c'
+                }]
             },
-            plugins: {
-                legend: {
-                    display: false
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                tooltip: {
-                    callbacks: {
-                        title: function(context) {
-                            return context[0].label;
-                        },
-                        label: function(context) {
-                            return `Adeudos: $${context.parsed.y.toFixed(2)}`;
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                return `Adeudos: $${context.parsed.y.toFixed(2)}`;
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        color: '#f1f5f9'
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        color: '#64748b'
-                    }
                 },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#f1f5f9'
+                scales: {
+                    x: {
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            color: '#64748b'
+                        }
                     },
-                    ticks: {
-                        color: '#64748b',
-                        callback: function(value) {
-                            return '$' + value;
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            callback: function(value) {
+                                return '$' + value;
+                            }
                         }
                     }
                 }
             }
+        });
+    } catch (error) {
+        console.error('Error creating income chart:', error);
+    }
+}
+
+// Error handling
+function showErrorMessage(message) {
+    console.error(message);
+    
+    // Create error element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.style.cssText = `
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    `;
+    errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+    `;
+
+    // Insert in the active page
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+        const pageHeader = activePage.querySelector('.page-header');
+        if (pageHeader) {
+            pageHeader.appendChild(errorDiv);
+
+            // Remove after 8 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 8000);
         }
-    });
+    }
 }
 
 // Mostrar mensajes de éxito
@@ -727,7 +823,8 @@ window.bibliotecaSystem = {
     registrarDevolucion,
     updateDashboardStats,
     generatePDF,
-    estudiantes
+    estudiantes,
+    loadStudents
 };
 
 // ===============================================
@@ -788,7 +885,7 @@ function editStudent(index) {
 }
 
 // Función para guardar estudiante editado
-function saveEditedStudent() {
+async function saveEditedStudent() {
     if (currentEditIndex === -1) return;
     
     // Obtener los nuevos valores
@@ -810,54 +907,43 @@ function saveEditedStudent() {
         return;
     }
 
-    // Formatear folio
-    const folioFormateado = formatFolio(folioInput);
-    
-    // Validar formato de folio
-    if (folioFormateado.length !== 4 || isNaN(parseInt(folioFormateado))) {
-        alert('El folio debe ser un número de 4 dígitos (ej: 0001, 0123)');
-        return;
+    try {
+        showLoading('Actualizando estudiante...');
+        
+        const studentData = {
+            id: estudiantes[currentEditIndex].id,
+            folio: `No.${formatFolio(folioInput)}`,
+            matricula: matricula,
+            nombre: nombre,
+            carrera: carrera,
+            adeudo: montoAdeudo
+        };
+
+        const response = await apiRequest('students', 'PUT', studentData);
+        
+        if (response.success) {
+            // Update local array
+            estudiantes[currentEditIndex] = {
+                ...estudiantes[currentEditIndex],
+                ...studentData,
+                estado: montoAdeudo > 0 ? 'con_adeudo' : 'sin_adeudo'
+            };
+            
+            // Actualizar estadísticas y cerrar modal
+            updateDashboardStats();
+            updateReportsStats();
+            updateCurrentFolio();
+            document.getElementById('editModal').style.display = 'none';
+            
+            // Mostrar mensaje de éxito
+            showSuccessMessage(response.message, 'success');
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al actualizar estudiante: ' + error.message);
     }
-    
-    // Validar folio único (excluyendo el registro actual)
-    if (!validateFolioUnique(folioFormateado, currentEditIndex)) {
-        alert(`El folio ${folioFormateado} ya existe. Por favor, use otro folio.`);
-        return;
-    }
-    
-    // Actualizar el estudiante manteniendo fecha y hora originales si existen
-    estudiantes[currentEditIndex] = {
-        ...estudiantes[currentEditIndex],
-        folio: `No.${folioFormateado}`,
-        matricula: matricula,
-        nombre: nombre,
-        carrera: carrera,
-        adeudo: montoAdeudo,
-        estado: montoAdeudo > 0 ? 'con_adeudo' : 'sin_adeudo',
-        // Mantener fecha y hora originales, o crear nuevas si no existen
-        fechaRegistro: estudiantes[currentEditIndex].fechaRegistro || new Date().toISOString(),
-        horaRegistro: estudiantes[currentEditIndex].horaRegistro || new Date().toLocaleTimeString('es-ES', { 
-            hour: '2-digit', 
-            minute: '2-digit', 
-            second: '2-digit' 
-        })
-    };
-    
-    // Actualizar nextFolio para futuros automáticos
-    const allFolios = estudiantes.map(e => parseInt(e.folio.replace('No.', '')));
-    nextFolio = Math.max(...allFolios) + 1;
-    
-    // Actualizar estadísticas y cerrar modal
-    updateDashboardStats();
-    updateReportsStats();
-    updateCurrentFolio();
-    document.getElementById('editModal').style.display = 'none';
-    
-    // Mostrar mensaje de éxito
-    showSuccessMessage(
-        `Registro actualizado exitosamente: ${nombre} (No.${folioFormateado})`,
-        'success'
-    );
 }
 
 // Función para eliminar estudiante
@@ -878,26 +964,38 @@ function deleteStudent(index) {
 }
 
 // Función para confirmar eliminación
-function confirmDeleteStudent() {
+async function confirmDeleteStudent() {
     if (currentDeleteIndex === -1) return;
     
     const estudianteEliminado = estudiantes[currentDeleteIndex];
     
-    // Eliminar el estudiante del array
-    estudiantes.splice(currentDeleteIndex, 1);
-    
-    // Actualizar estadísticas
-    updateDashboardStats();
-    updateReportsStats();
-    
-    // Cerrar modal
-    document.getElementById('deleteModal').style.display = 'none';
-    
-    // Mostrar mensaje de confirmación
-    showSuccessMessage(
-        `Registro eliminado: ${estudianteEliminado.nombre} (${estudianteEliminado.folio})`,
-        'success'
-    );
+    try {
+        showLoading('Eliminando estudiante...');
+        
+        const response = await apiRequest('students', 'DELETE', { 
+            id: estudianteEliminado.id 
+        });
+        
+        if (response.success) {
+            // Remove from local array
+            estudiantes.splice(currentDeleteIndex, 1);
+            
+            // Actualizar estadísticas
+            updateDashboardStats();
+            updateReportsStats();
+            
+            // Cerrar modal
+            document.getElementById('deleteModal').style.display = 'none';
+            
+            // Mostrar mensaje de confirmación
+            showSuccessMessage(response.message, 'success');
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al eliminar estudiante: ' + error.message);
+    }
     
     currentDeleteIndex = -1;
 }
