@@ -1,0 +1,1042 @@
+// Sistema de Control de Biblioteca - JavaScript
+/* global Chart */
+
+// Array de estudiantes - inicializado vacío para uso en producción
+const estudiantes = [];
+
+// Variables globales
+let currentPage = 'dashboard';
+let nextFolio = 1; // Reiniciado para comenzar desde el folio 0001
+let estadoChart = null;
+let ingresosChart = null;
+let currentEditIndex = -1;
+let currentDeleteIndex = -1;
+
+// Inicialización del sistema
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNavigation();
+    initializeFormHandlers();
+    initializeSearchHandlers();
+    initializeModalHandlers();
+    updateDashboardStats();
+    updateReportsStats();
+    initializeCharts();
+});
+
+// Navegación entre páginas
+function initializeNavigation() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const actionCards = document.querySelectorAll('.action-card');
+    const actionButtons = document.querySelectorAll('[data-page]');
+
+    // Navegación desde menú lateral
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const targetPage = this.getAttribute('data-page');
+            navigateToPage(targetPage);
+            
+            // Actualizar estado activo del menú
+            menuItems.forEach(mi => mi.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // Navegación desde tarjetas de acción
+    actionCards.forEach(card => {
+        const button = card.querySelector('.btn-action');
+        button.addEventListener('click', function() {
+            const targetPage = card.getAttribute('data-page');
+            navigateToPage(targetPage);
+            updateActiveMenu(targetPage);
+        });
+    });
+
+    // Navegación desde botones con data-page
+    actionButtons.forEach(button => {
+        if (!button.classList.contains('menu-item') && !button.classList.contains('btn-action')) {
+            button.addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-page');
+                navigateToPage(targetPage);
+                updateActiveMenu(targetPage);
+            });
+        }
+    });
+}
+
+function navigateToPage(pageName) {
+    // Ocultar todas las páginas
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+
+    // Mostrar página seleccionada
+    const targetPage = document.getElementById(pageName);
+    if (targetPage) {
+        targetPage.classList.add('active');
+        currentPage = pageName;
+
+        // Acciones específicas por página
+        if (pageName === 'registro') {
+            updateCurrentFolio();
+        } else if (pageName === 'busqueda') {
+            clearSearchResults();
+        } else if (pageName === 'reportes') {
+            // Esperar un poco para que el DOM se actualice
+            setTimeout(() => {
+                initializeCharts();
+            }, 100);
+        }
+    }
+}
+
+function updateActiveMenu(pageName) {
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === pageName) {
+            item.classList.add('active');
+        }
+    });
+}
+
+// Manejo de formularios
+function initializeFormHandlers() {
+    const registrarBtn = document.getElementById('registrar-devolucion');
+    const regenerarBtn = document.getElementById('regenerar-folios');
+
+    // Registrar devolución
+    registrarBtn.addEventListener('click', function() {
+        registrarDevolucion();
+    });
+
+    // Regenerar folios
+    regenerarBtn.addEventListener('click', function() {
+        regenerarFolios();
+    });
+
+    // Actualizar resumen cuando cambien los campos
+    const formInputs = document.querySelectorAll('#registro input, #registro select');
+    formInputs.forEach(input => {
+        input.addEventListener('input', updateResumen);
+    });
+}
+
+function updateCurrentFolio() {
+    // El folio ahora se actualiza dinámicamente en el resumen
+    const folioElement = document.getElementById('current-folio');
+    const nextAvailable = getNextAvailableFolio();
+    
+    if (folioElement) {
+        folioElement.textContent = nextAvailable;
+    }
+    
+    updateResumen();
+}
+
+// Función para obtener el próximo folio disponible
+function getNextAvailableFolio() {
+    if (estudiantes.length === 0) return "0001";
+    
+    // Obtener todos los números de folio existentes
+    const existingFolios = estudiantes.map(e => parseInt(e.folio.replace('No.', '')));
+    const maxFolio = Math.max(...existingFolios);
+    
+    return String(maxFolio + 1).padStart(4, '0');
+}
+
+// Función para validar folio único
+function validateFolioUnique(folio, excludeIndex = -1) {
+    return !estudiantes.some((estudiante, index) => 
+        estudiante.folio === `No.${folio}` && index !== excludeIndex
+    );
+}
+
+// Función para formatear folio
+function formatFolio(input) {
+    // Remover caracteres no numéricos
+    let numbers = input.replace(/\D/g, '');
+    
+    // Limitar a 4 dígitos
+    numbers = numbers.substring(0, 4);
+    
+    // Rellenar con ceros
+    return numbers.padStart(4, '0');
+}
+
+function updateResumen() {
+    const matricula = document.getElementById('matricula').value;
+    const nombre = document.getElementById('nombre').value;
+    const carrera = document.getElementById('carrera').value;
+    const montoAdeudo = document.getElementById('monto-adeudo').value;
+    const folioManual = document.getElementById('folio-manual').value;
+
+    // Actualizar elementos del resumen
+    document.getElementById('resumen-estudiante').textContent = nombre || 'N/A';
+    document.getElementById('resumen-carrera').textContent = carrera || 'N/A';
+    
+    // Formatear monto del adeudo
+    const monto = parseFloat(montoAdeudo) || 0;
+    document.getElementById('resumen-adeudo').textContent = `$${monto.toFixed(2)}`;
+
+    // Mostrar folio (manual o automático)
+    const resumenFolioElement = document.getElementById('resumen-folio');
+    if (folioManual && folioManual.trim()) {
+        const formattedFolio = formatFolio(folioManual.trim());
+        resumenFolioElement.textContent = formattedFolio;
+        
+        // Validar si es único
+        if (!validateFolioUnique(formattedFolio)) {
+            resumenFolioElement.innerHTML = `${formattedFolio} <span style="color: #ef4444; font-size: 12px;">(⚠️ DUPLICADO)</span>`;
+        }
+    } else {
+        resumenFolioElement.textContent = getNextAvailableFolio();
+    }
+}
+
+function registrarDevolucion() {
+    const matricula = document.getElementById('matricula').value.trim();
+    const nombre = document.getElementById('nombre').value.trim();
+    const carrera = document.getElementById('carrera').value;
+    const montoAdeudo = parseFloat(document.getElementById('monto-adeudo').value) || 0;
+    const folioManual = document.getElementById('folio-manual').value.trim();
+
+    // Validar campos requeridos
+    if (!matricula || !nombre || !carrera) {
+        alert('Por favor, complete todos los campos requeridos');
+        return;
+    }
+
+    // Validar monto (debe ser positivo o cero)
+    if (montoAdeudo < 0) {
+        alert('El monto del adeudo no puede ser negativo');
+        return;
+    }
+
+    // Determinar folio final
+    let folioFinal;
+    if (folioManual) {
+        folioFinal = formatFolio(folioManual);
+        
+        // Validar formato de folio
+        if (folioFinal.length !== 4 || isNaN(parseInt(folioFinal))) {
+            alert('El folio debe ser un número de 4 dígitos (ej: 0001, 0123)');
+            return;
+        }
+        
+        // Validar folio único
+        if (!validateFolioUnique(folioFinal)) {
+            alert(`El folio ${folioFinal} ya existe. Por favor, use otro folio o déjelo vacío para asignación automática.`);
+            return;
+        }
+    } else {
+        folioFinal = getNextAvailableFolio();
+    }
+
+    // Crear nuevo registro con fecha y hora actual
+    const ahora = new Date();
+    const nuevoEstudiante = {
+        folio: `No.${folioFinal}`,
+        matricula: matricula,
+        nombre: nombre,
+        carrera: carrera,
+        adeudo: montoAdeudo,
+        estado: montoAdeudo > 0 ? 'con_adeudo' : 'sin_adeudo',
+        fechaRegistro: ahora.toISOString(),
+        horaRegistro: ahora.toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        })
+    };
+
+    // Agregar al array
+    estudiantes.push(nuevoEstudiante);
+
+    // Actualizar nextFolio para el próximo automático
+    const allFolios = estudiantes.map(e => parseInt(e.folio.replace('No.', '')));
+    nextFolio = Math.max(...allFolios) + 1;
+
+    // Limpiar formulario
+    clearForm();
+
+    // Actualizar estadísticas
+    updateDashboardStats();
+    updateReportsStats();
+
+    // Mostrar mensaje de éxito
+    showSuccessMessage(
+        `Devolución registrada exitosamente: ${nombre} (No.${folioFinal}) - Adeudo: $${montoAdeudo.toFixed(2)}`,
+        'success'
+    );
+
+    // Actualizar folio
+    updateCurrentFolio();
+}
+
+function clearForm() {
+    document.getElementById('folio-manual').value = '';
+    document.getElementById('matricula').value = '';
+    document.getElementById('nombre').value = '';
+    document.getElementById('carrera').value = '';
+    document.getElementById('monto-adeudo').value = '';
+    updateResumen();
+}
+
+// Nueva función para regenerar folios
+function regenerarFolios() {
+    if (estudiantes.length === 0) {
+        alert('No hay registros para regenerar folios');
+        return;
+    }
+
+    const confirmacion = confirm(
+        '⚠️ ADVERTENCIA: Esta acción renumerará TODOS los folios existentes en orden secuencial (0001, 0002, 0003...).\n\n' +
+        '🔹 Se mantendrá el orden actual de registros\n' +
+        '🔹 Los PDFs existentes quedarán con los folios antiguos\n' +
+        '🔹 Esta acción NO se puede deshacer\n\n' +
+        '¿Está seguro que desea continuar?'
+    );
+
+    if (!confirmacion) return;
+
+    // Regenerar folios secuencialmente
+    estudiantes.forEach((estudiante, index) => {
+        const nuevoFolio = String(index + 1).padStart(4, '0');
+        estudiante.folio = `No.${nuevoFolio}`;
+    });
+
+    // Actualizar nextFolio
+    nextFolio = estudiantes.length + 1;
+
+    // Actualizar estadísticas y tabla
+    updateDashboardStats();
+    updateReportsStats();
+    updateCurrentFolio();
+
+    // Mostrar mensaje de éxito
+    showSuccessMessage(
+        `✅ Folios regenerados exitosamente. ${estudiantes.length} registros renumerados secuencialmente.`,
+        'success'
+    );
+}
+
+// Búsqueda
+function initializeSearchHandlers() {
+    const searchInput = document.getElementById('search-input');
+    const searchResult = document.getElementById('search-result');
+    const buscarBtn = document.getElementById('buscar-btn');
+
+    // Actualizar término de búsqueda
+    searchInput.addEventListener('input', function() {
+        const term = this.value.trim();
+        searchResult.textContent = term || 'Ej. 0001, S22007409 o Juan Pérez';
+    });
+
+    // Realizar búsqueda
+    buscarBtn.addEventListener('click', function() {
+        realizarBusqueda();
+    });
+
+    // Buscar con Enter
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            realizarBusqueda();
+        }
+    });
+}
+
+function realizarBusqueda() {
+    const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+    
+    if (!searchTerm) {
+        alert('Por favor, ingrese un término de búsqueda');
+        return;
+    }
+
+    // Buscar en estudiantes
+    const results = estudiantes.filter(estudiante => {
+        return estudiante.folio.toLowerCase().includes(searchTerm) ||
+               estudiante.matricula.toLowerCase().includes(searchTerm) ||
+               estudiante.nombre.toLowerCase().includes(searchTerm);
+    });
+
+    displaySearchResults(results, searchTerm);
+}
+
+function displaySearchResults(results, searchTerm) {
+    const resultsSection = document.getElementById('results-section');
+    const studentCards = document.getElementById('student-cards');
+
+    if (results.length === 0) {
+        studentCards.innerHTML = `
+            <div class="student-card">
+                <div class="student-info">
+                    <div class="info-item">
+                        <div class="info-label">Sin resultados</div>
+                        <div class="info-value">No se encontraron registros para "${searchTerm}"</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        studentCards.innerHTML = results.map(estudiante => `
+            <div class="student-card">
+                <div class="student-info">
+                    <div class="info-item">
+                        <div class="info-label">Folio</div>
+                        <div class="info-value">${estudiante.folio}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Estudiante</div>
+                        <div class="info-value">${estudiante.nombre}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Matrícula</div>
+                        <div class="info-value">${estudiante.matricula}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Carrera</div>
+                        <div class="info-value">${estudiante.carrera}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Estado</div>
+                        <div class="info-value">${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `Adeudo: $${estudiante.adeudo.toFixed(2)}`}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    resultsSection.style.display = 'block';
+}
+
+function clearSearchResults() {
+    const resultsSection = document.getElementById('results-section');
+    const searchInput = document.getElementById('search-input');
+    const searchResult = document.getElementById('search-result');
+    
+    resultsSection.style.display = 'none';
+    searchInput.value = '';
+    searchResult.textContent = 'Ej. 0001, S22007409 o Juan Pérez';
+}
+
+// Estadísticas
+function updateDashboardStats() {
+    const totalDevoluciones = estudiantes.length;
+    const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
+    const conAdeudo = estudiantes.filter(e => e.estado === 'con_adeudo').length;
+    const ingresosTotales = estudiantes.reduce((sum, e) => sum + e.adeudo, 0);
+
+    // Actualizar dashboard
+    document.getElementById('total-devoluciones').textContent = totalDevoluciones;
+    document.getElementById('sin-adeudo').textContent = sinAdeudo;
+    document.getElementById('con-adeudo').textContent = conAdeudo;
+    document.getElementById('ingresos').textContent = `$${ingresosTotales}`;
+
+    // Actualizar tabla de estudiantes
+    updateStudentsTable();
+}
+
+function updateReportsStats() {
+    const totalDevoluciones = estudiantes.length;
+    const conAdeudo = estudiantes.filter(e => e.estado === 'con_adeudo').length;
+    const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
+    const ingresosTotales = estudiantes.reduce((sum, e) => sum + e.adeudo, 0);
+
+    // Actualizar reportes
+    document.getElementById('report-total').textContent = totalDevoluciones;
+    document.getElementById('report-adeudos').textContent = conAdeudo;
+    document.getElementById('report-tiempo').textContent = sinAdeudo;
+    document.getElementById('report-ingresos').textContent = `$${ingresosTotales}`;
+}
+
+// Gráficos
+function initializeCharts() {
+    createEstadoChart();
+    createIngresosChart();
+}
+
+function createEstadoChart() {
+    const ctx = document.getElementById('estadoChart');
+    if (!ctx) return;
+
+    if (estadoChart) {
+        estadoChart.destroy();
+    }
+
+    const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
+    const conAdeudo = estudiantes.filter(e => e.estado === 'con_adeudo').length;
+
+    estadoChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Sin Adeudo', 'Con Adeudo'],
+            datasets: [{
+                data: [sinAdeudo, conAdeudo],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function createIngresosChart() {
+    const ctx = document.getElementById('ingresosChart');
+    if (!ctx) return;
+
+    if (ingresosChart) {
+        ingresosChart.destroy();
+    }
+
+    // Todos los meses del año
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    // Calcular adeudos reales por mes basado en los datos de estudiantes
+    const adeudosPorMes = new Array(12).fill(0);
+    
+    // Si hay estudiantes, calcular adeudos por mes de registro
+    estudiantes.forEach(estudiante => {
+        if (estudiante.adeudo > 0 && estudiante.fechaRegistro) {
+            const fecha = new Date(estudiante.fechaRegistro);
+            const mes = fecha.getMonth(); // 0-11
+            adeudosPorMes[mes] += estudiante.adeudo;
+        }
+    });
+    
+    // Si no hay datos reales, usar datos de ejemplo
+    if (estudiantes.length === 0) {
+        const datosEjemplo = [120, 85, 150, 95, 200, 175, 90, 160, 110, 140, 185, 130];
+        adeudosPorMes.splice(0, 12, ...datosEjemplo);
+    }
+
+    ingresosChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Adeudos ($)',
+                data: adeudosPorMes,
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ef4444',
+                pointBorderColor: '#dc2626',
+                pointHoverBackgroundColor: '#dc2626',
+                pointHoverBorderColor: '#b91c1c'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            return `Adeudos: $${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: '#f1f5f9'
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        color: '#64748b'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#f1f5f9'
+                    },
+                    ticks: {
+                        color: '#64748b',
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Mostrar mensajes de éxito
+function showSuccessMessage(message, type = 'success') {
+    // Crear elemento de mensaje
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'success-message';
+    messageDiv.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
+
+    // Insertar en la página actual
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+        const pageHeader = activePage.querySelector('.page-header');
+        if (pageHeader) {
+            pageHeader.appendChild(messageDiv);
+
+            // Remover después de 5 segundos
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+    }
+}
+
+// Actualizar tabla de estudiantes
+function updateStudentsTable() {
+    const studentsTable = document.getElementById('students-table');
+    if (!studentsTable) return;
+
+    if (estudiantes.length === 0) {
+        studentsTable.innerHTML = `
+            <div class="table-row">
+                <div class="table-cell" style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
+                    No hay registros de devoluciones
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    studentsTable.innerHTML = estudiantes.map((estudiante, index) => `
+        <div class="table-row">
+            <div class="table-cell">
+                <strong>${estudiante.folio}</strong>
+            </div>
+            <div class="table-cell">
+                <div>
+                    <div class="student-name">${estudiante.nombre}</div>
+                    <small class="student-matricula">${estudiante.matricula}</small>
+                </div>
+            </div>
+            <div class="table-cell">
+                ${estudiante.carrera}
+            </div>
+            <div class="table-cell">
+                <span class="status-badge ${estudiante.estado === 'sin_adeudo' ? 'status-sin-adeudo' : 'status-con-adeudo'}">
+                    ${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `$${estudiante.adeudo.toFixed(2)}`}
+                </span>
+            </div>
+            <div class="table-cell">
+                <div class="action-buttons">
+                    <button class="btn-edit" onclick="editStudent(${index})" title="Editar registro">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-pdf" onclick="previewPDF(${index})" title="Previsualizar comprobante PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deleteStudent(${index})" title="Eliminar registro">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Función para generar PDF del comprobante
+function generatePDF(estudianteIndex) {
+    const estudiante = estudiantes[estudianteIndex];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Generar contenido del PDF
+    generatePDFContent(doc, estudiante);
+    
+    // Guardar PDF
+    const fileName = `Comprobante_${estudiante.folio}_${estudiante.nombre.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
+    
+    // Mostrar mensaje de confirmación
+    showSuccessMessage(
+        `Comprobante PDF generado exitosamente para ${estudiante.nombre} (${estudiante.folio})`,
+        'success'
+    );
+}
+
+// Funciones de utilidad
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+function generateFolio(number) {
+    return `No.${String(number).padStart(4, '0')}`;
+}
+
+// Auto-completar datos de estudiantes conocidos
+document.addEventListener('DOMContentLoaded', function() {
+    const matriculaInput = document.getElementById('matricula');
+    
+    if (matriculaInput) {
+        matriculaInput.addEventListener('blur', function() {
+            const matricula = this.value.trim();
+            const estudiante = estudiantes.find(e => e.matricula === matricula);
+            
+            if (estudiante) {
+                document.getElementById('nombre').value = estudiante.nombre;
+                document.getElementById('carrera').value = estudiante.carrera;
+                updateResumen();
+            }
+        });
+    }
+});
+
+// Exportar funciones para uso global
+window.bibliotecaSystem = {
+    navigateToPage,
+    realizarBusqueda,
+    registrarDevolucion,
+    updateDashboardStats,
+    generatePDF,
+    estudiantes
+};
+
+// ===============================================
+// FUNCIONES PARA EDITAR, ELIMINAR Y PREVISUALIZAR PDF
+// ===============================================
+
+// Inicializar manejadores de modales
+function initializeModalHandlers() {
+    // Cerrar modales al hacer clic en X o fuera del modal
+    const modales = document.querySelectorAll('.modal');
+    modales.forEach(modal => {
+        const closeBtn = modal.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // Botones del modal de edición
+    document.getElementById('cancelEdit').addEventListener('click', () => {
+        document.getElementById('editModal').style.display = 'none';
+    });
+
+    document.getElementById('saveEdit').addEventListener('click', saveEditedStudent);
+
+    // Botones del modal de eliminación
+    document.getElementById('cancelDelete').addEventListener('click', () => {
+        document.getElementById('deleteModal').style.display = 'none';
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', confirmDeleteStudent);
+
+    // Botón de descarga en modal PDF
+    document.getElementById('downloadPdf').addEventListener('click', downloadCurrentPDF);
+}
+
+// Función para editar estudiante
+function editStudent(index) {
+    currentEditIndex = index;
+    const estudiante = estudiantes[index];
+    
+    // Llenar el formulario con los datos actuales
+    document.getElementById('edit-folio').value = estudiante.folio.replace('No.', '');
+    document.getElementById('edit-matricula').value = estudiante.matricula;
+    document.getElementById('edit-nombre').value = estudiante.nombre;
+    document.getElementById('edit-carrera').value = estudiante.carrera;
+    document.getElementById('edit-monto-adeudo').value = estudiante.adeudo.toFixed(2);
+    
+    // Mostrar el modal
+    document.getElementById('editModal').style.display = 'block';
+}
+
+// Función para guardar estudiante editado
+function saveEditedStudent() {
+    if (currentEditIndex === -1) return;
+    
+    // Obtener los nuevos valores
+    const folioInput = document.getElementById('edit-folio').value.trim();
+    const matricula = document.getElementById('edit-matricula').value.trim();
+    const nombre = document.getElementById('edit-nombre').value.trim();
+    const carrera = document.getElementById('edit-carrera').value;
+    const montoAdeudo = parseFloat(document.getElementById('edit-monto-adeudo').value) || 0;
+    
+    // Validar campos requeridos
+    if (!folioInput || !matricula || !nombre || !carrera) {
+        alert('Por favor, complete todos los campos');
+        return;
+    }
+    
+    // Validar monto
+    if (montoAdeudo < 0) {
+        alert('El monto del adeudo no puede ser negativo');
+        return;
+    }
+
+    // Formatear folio
+    const folioFormateado = formatFolio(folioInput);
+    
+    // Validar formato de folio
+    if (folioFormateado.length !== 4 || isNaN(parseInt(folioFormateado))) {
+        alert('El folio debe ser un número de 4 dígitos (ej: 0001, 0123)');
+        return;
+    }
+    
+    // Validar folio único (excluyendo el registro actual)
+    if (!validateFolioUnique(folioFormateado, currentEditIndex)) {
+        alert(`El folio ${folioFormateado} ya existe. Por favor, use otro folio.`);
+        return;
+    }
+    
+    // Actualizar el estudiante manteniendo fecha y hora originales si existen
+    estudiantes[currentEditIndex] = {
+        ...estudiantes[currentEditIndex],
+        folio: `No.${folioFormateado}`,
+        matricula: matricula,
+        nombre: nombre,
+        carrera: carrera,
+        adeudo: montoAdeudo,
+        estado: montoAdeudo > 0 ? 'con_adeudo' : 'sin_adeudo',
+        // Mantener fecha y hora originales, o crear nuevas si no existen
+        fechaRegistro: estudiantes[currentEditIndex].fechaRegistro || new Date().toISOString(),
+        horaRegistro: estudiantes[currentEditIndex].horaRegistro || new Date().toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            second: '2-digit' 
+        })
+    };
+    
+    // Actualizar nextFolio para futuros automáticos
+    const allFolios = estudiantes.map(e => parseInt(e.folio.replace('No.', '')));
+    nextFolio = Math.max(...allFolios) + 1;
+    
+    // Actualizar estadísticas y cerrar modal
+    updateDashboardStats();
+    updateReportsStats();
+    updateCurrentFolio();
+    document.getElementById('editModal').style.display = 'none';
+    
+    // Mostrar mensaje de éxito
+    showSuccessMessage(
+        `Registro actualizado exitosamente: ${nombre} (No.${folioFormateado})`,
+        'success'
+    );
+}
+
+// Función para eliminar estudiante
+function deleteStudent(index) {
+    currentDeleteIndex = index;
+    const estudiante = estudiantes[index];
+    
+    // Mostrar información del estudiante a eliminar
+    document.getElementById('deleteStudentInfo').innerHTML = `
+        <strong>Folio:</strong> ${estudiante.folio}<br>
+        <strong>Estudiante:</strong> ${estudiante.nombre}<br>
+        <strong>Matrícula:</strong> ${estudiante.matricula}<br><br>
+        Esta acción no se puede deshacer.
+    `;
+    
+    // Mostrar modal de confirmación
+    document.getElementById('deleteModal').style.display = 'block';
+}
+
+// Función para confirmar eliminación
+function confirmDeleteStudent() {
+    if (currentDeleteIndex === -1) return;
+    
+    const estudianteEliminado = estudiantes[currentDeleteIndex];
+    
+    // Eliminar el estudiante del array
+    estudiantes.splice(currentDeleteIndex, 1);
+    
+    // Actualizar estadísticas
+    updateDashboardStats();
+    updateReportsStats();
+    
+    // Cerrar modal
+    document.getElementById('deleteModal').style.display = 'none';
+    
+    // Mostrar mensaje de confirmación
+    showSuccessMessage(
+        `Registro eliminado: ${estudianteEliminado.nombre} (${estudianteEliminado.folio})`,
+        'success'
+    );
+    
+    currentDeleteIndex = -1;
+}
+
+// Variable para guardar los datos del PDF actual
+let currentPdfData = null;
+
+// Función para previsualizar PDF
+function previewPDF(index) {
+    const estudiante = estudiantes[index];
+    currentPdfData = { estudiante, index };
+    
+    // Generar el PDF en un blob para previsualización
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Generar contenido del PDF (mismo código que generatePDF pero sin descargar)
+    generatePDFContent(doc, estudiante);
+    
+    // Convertir a blob y mostrar en iframe
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    // Cargar en el iframe
+    document.getElementById('pdfViewer').src = pdfUrl;
+    
+    // Mostrar modal
+    document.getElementById('pdfModal').style.display = 'block';
+}
+
+// Función para descargar el PDF actual
+function downloadCurrentPDF() {
+    if (!currentPdfData) return;
+    
+    const { estudiante } = currentPdfData;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Generar contenido del PDF
+    generatePDFContent(doc, estudiante);
+    
+    // Descargar
+    const fileName = `Comprobante_${estudiante.folio}_${estudiante.nombre.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
+    
+    // Mostrar mensaje de confirmación
+    showSuccessMessage(
+        `Comprobante PDF descargado: ${estudiante.nombre} (${estudiante.folio})`,
+        'success'
+    );
+}
+
+// Función para generar contenido del PDF (reutilizable)
+function generatePDFContent(doc, estudiante) {
+    // Configuración de fuentes y colores
+    doc.setFont("helvetica");
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(44, 62, 80);
+    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 30, { align: 'center' });
+    
+    doc.setFontSize(16);
+    doc.text('COMPROBANTE DE DEVOLUCIÓN', 105, 45, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setTextColor(52, 73, 94);
+    doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
+    
+    // Línea separadora
+    doc.setDrawColor(149, 165, 166);
+    doc.line(20, 70, 190, 70);
+    
+    // Datos del estudiante
+    let yPosition = 90;
+    const lineHeight = 15;
+    
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    
+    // Función helper para añadir campo
+    const addField = (label, value, y) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${label}:`, 25, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, 25, y + 8);
+        return y + lineHeight + 5;
+    };
+    
+    yPosition = addField('Matrícula', estudiante.matricula, yPosition);
+    yPosition = addField('Estudiante', estudiante.nombre, yPosition);
+    yPosition = addField('Carrera', estudiante.carrera, yPosition);
+    
+    // Hora de registro en lugar de fecha de devolución
+    const horaRegistro = estudiante.horaRegistro || new Date().toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+    yPosition = addField('Hora de registro', horaRegistro, yPosition);
+    
+    // Adeudo (destacado)
+    yPosition += 10;
+    if (estudiante.adeudo > 0) {
+        doc.setFontSize(14);
+        doc.setTextColor(231, 76, 60);
+        doc.setFont("helvetica", "bold");
+        doc.text('MONTO DEL ADEUDO:', 25, yPosition);
+        doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 10);
+    } else {
+        doc.setFontSize(14);
+        doc.setTextColor(39, 174, 96);
+        doc.setFont("helvetica", "bold");
+        doc.text('DEVOLUCIÓN SIN ADEUDO', 25, yPosition);
+        doc.text('$0.00 pesos', 25, yPosition + 10);
+    }
+    
+    // Información del recibo
+    yPosition += 30;
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "normal");
+    
+    yPosition = addField('Número de recibo', estudiante.folio.replace('No.', ''), yPosition);
+    yPosition = addField('Fecha de emisión', formatDateForPDF(new Date().toISOString().split('T')[0]), yPosition);
+    
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(127, 140, 141);
+    doc.text('Sistema de Control de Biblioteca', 105, 280, { align: 'center' });
+    
+    // Línea decorativa en el footer
+    doc.setDrawColor(149, 165, 166);
+    doc.line(20, 270, 190, 270);
+}
+
+// Función helper para formatear fechas en el PDF
+function formatDateForPDF(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'numeric',
+        year: 'numeric'
+    });
+}

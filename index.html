@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Control de Biblioteca</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-book"></i>
+                    <div>
+                        <h3>Biblioteca</h3>
+                        <p>Control de Devoluciones</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <h4>Menú Principal</h4>
+                <ul>
+                    <li class="menu-item active" data-page="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
+                    </li>
+                    <li class="menu-item" data-page="registro">
+                        <i class="fas fa-undo"></i>
+                        <span>Registro de Devolución</span>
+                    </li>
+                    <li class="menu-item" data-page="busqueda">
+                        <i class="fas fa-search"></i>
+                        <span>Búsqueda de Estudiantes</span>
+                    </li>
+                    <li class="menu-item" data-page="reportes">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reportes</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div class="page active" id="dashboard">
+                <div class="page-header">
+                    <h1>Sistema de Control de Biblioteca</h1>
+                    <p>Registro de Devoluciones con Folios Automáticos</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-devoluciones">0</h3>
+                            <p>Total de Devoluciones</p>
+                            <small>Libros devueltos</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="sin-adeudo">0</h3>
+                            <p>Devoluciones sin Adeudo</p>
+                            <small>Entregados a tiempo</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="con-adeudo">0</h3>
+                            <p>Devoluciones con Adeudo</p>
+                            <small>Con retraso</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="ingresos">$0</h3>
+                            <p>Ingresos por Adeudos</p>
+                            <small>Total recaudado</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Cards -->
+                <div class="action-grid">
+                    <div class="action-card" data-page="registro">
+                        <div class="action-icon blue">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Registro de Devolución</h3>
+                            <p>Registrar devolución con folio automático</p>
+                        </div>
+                        <button class="btn-action">Acceder</button>
+                    </div>
+                    
+                    <div class="action-card" data-page="busqueda">
+                        <div class="action-icon green">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Búsqueda de Estudiantes</h3>
+                            <p>Consultar por folio, nombre o matrícula</p>
+                        </div>
+                        <button class="btn-action">Acceder</button>
+                    </div>
+                    
+                    <div class="action-card" data-page="reportes">
+                        <div class="action-icon purple">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="action-content">
+                            <h3>Reportes</h3>
+                            <p>Ver estadísticas y dashboard</p>
+                        </div>
+                        <button class="btn-action">Acceder</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registro Page -->
+            <div class="page" id="registro">
+                <div class="page-header">
+                    <h1>Registro de Devolución</h1>
+                    <div class="folio-display">
+                        # Folio: <span id="current-folio">0001</span>
+                    </div>
+                </div>
+
+                <div class="folio-info">
+                    <div class="info-box">
+                        <i class="fas fa-info-circle"></i>
+                        <p><strong>Folio automático:</strong> El sistema generará automáticamente el folio. Ingrese los datos del estudiante y el monto del adeudo correspondiente.</p>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div class="form-section">
+                        <h3>Datos del Estudiante</h3>
+                        <p>Información del estudiante que realiza la devolución</p>
+
+                        <div class="form-group">
+                            <label for="folio-manual">Folio (Opcional - se genera automático si se deja vacío)</label>
+                            <input type="text" id="folio-manual" placeholder="Ej. 0001 o déjalo vacío para automático">
+                            <small class="field-help">Formato: 4 dígitos (0001, 0002, etc.). Si está vacío se asignará automáticamente.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="matricula">Matrícula del Estudiante</label>
+                            <input type="text" id="matricula" placeholder="Ej. S22007409">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nombre">Nombre del Estudiante</label>
+                            <input type="text" id="nombre" placeholder="Ej. Juan Pérez">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="carrera">Carrera</label>
+                            <select id="carrera">
+                                <option value="">Seleccionar carrera</option>
+                                <option value="Administración de Sistemas de Salud">Administración de Sistemas de Salud</option>
+                                <option value="Agroecología y Soberanía Alimentaria">Agroecología y Soberanía Alimentaria</option>
+                                <option value="Agronegocios Internacionales">Agronegocios Internacionales</option>
+                                <option value="Anestesiología">Anestesiología</option>
+                                <option value="Arquitectura">Arquitectura</option>
+                                <option value="Biología">Biología</option>
+                                <option value="Biología Marina">Biología Marina</option>
+                                <option value="Ciencias Agropecuarias">Ciencias Agropecuarias</option>
+                                <option value="Ciencias de la Ingeniería">Ciencias de la Ingeniería</option>
+                                <option value="Ciencias del Ambiente">Ciencias del Ambiente</option>
+                                <option value="Ciencias Marinas y Costeras">Ciencias Marinas y Costeras</option>
+                                <option value="Cirugía General">Cirugía General</option>
+                                <option value="Cirujano Dentista">Cirujano Dentista</option>
+                                <option value="Contaduría">Contaduría</option>
+                                <option value="Derecho">Derecho</option>
+                                <option value="Derecho con Enfoque de Pluralismo Jurídico">Derecho con Enfoque de Pluralismo Jurídico</option>
+                                <option value="Dirección Empresarial">Dirección Empresarial</option>
+                                <option value="Dirección Estratégica de Recursos Humanos">Dirección Estratégica de Recursos Humanos</option>
+                                <option value="Enfermería">Enfermería</option>
+                                <option value="Enseñanza de las Artes">Enseñanza de las Artes</option>
+                                <option value="Epidemiología">Epidemiología</option>
+                                <option value="Gestión Ambiental para la Sustentabilidad">Gestión Ambiental para la Sustentabilidad</option>
+                                <option value="Gestión del Aprendizaje">Gestión del Aprendizaje</option>
+                                <option value="Gestión e Impacto Ambiental">Gestión e Impacto Ambiental</option>
+                                <option value="Gestión Intercultural">Gestión Intercultural</option>
+                                <option value="Gestión Intercultural para el Desarrollo">Gestión Intercultural para el Desarrollo</option>
+                                <option value="Gestión y Dirección de Negocios">Gestión y Dirección de Negocios</option>
+                                <option value="Ginecología y Obstetricia">Ginecología y Obstetricia</option>
+                                <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+                                <option value="Ingeniería Civil">Ingeniería Civil</option>
+                                <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+                                <option value="Ingeniería en Electrónica y Comunicaciones">Ingeniería en Electrónica y Comunicaciones</option>
+                                <option value="Ingeniería en Tecnologías Computacionales">Ingeniería en Tecnologías Computacionales</option>
+                                <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                                <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+                                <option value="Ingeniería Mecánica Eléctrica">Ingeniería Mecánica Eléctrica</option>
+                                <option value="Ingeniería Petrolera">Ingeniería Petrolera</option>
+                                <option value="Ingeniería Química">Ingeniería Química</option>
+                                <option value="Ingeniero Agrónomo">Ingeniero Agrónomo</option>
+                                <option value="Manejo de Ecosistemas Marinos y Costeros">Manejo de Ecosistemas Marinos y Costeros</option>
+                                <option value="Medicina de Urgencias">Medicina de Urgencias</option>
+                                <option value="Medicina del Enfermo en Estado Crítico">Medicina del Enfermo en Estado Crítico</option>
+                                <option value="Medicina Familiar">Medicina Familiar</option>
+                                <option value="Medicina Interna">Medicina Interna</option>
+                                <option value="Médico Cirujano">Médico Cirujano</option>
+                                <option value="Médico Veterinario Zootecnista">Médico Veterinario Zootecnista</option>
+                                <option value="Ortopedia">Ortopedia</option>
+                                <option value="Pedagogía">Pedagogía</option>
+                                <option value="Pediatría">Pediatría</option>
+                                <option value="Psicología">Psicología</option>
+                                <option value="Sistemas Computacionales Administrativos">Sistemas Computacionales Administrativos</option>
+                                <option value="Trabajo Social">Trabajo Social</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Monto del Adeudo</h3>
+                        <p>Ingrese el monto total del adeudo (puede ser $0 si no hay deuda)</p>
+
+                        <div class="form-group">
+                            <label for="monto-adeudo">Monto del Adeudo ($)</label>
+                            <input type="number" id="monto-adeudo" placeholder="0.00" min="0" step="0.01">
+                        </div>
+
+                        <div class="monto-info">
+                            <div class="info-box">
+                                <i class="fas fa-info-circle"></i>
+                                <p><strong>Importante:</strong> Ingrese $0 si no hay adeudo, o el monto exacto si existe deuda pendiente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen Section -->
+                <div class="resumen-section">
+                    <h3>Resumen de Devolución</h3>
+                    <p>Confirme los datos antes de procesar la devolución</p>
+
+                    <div class="resumen-grid">
+                        <div class="resumen-item">
+                            <strong>Folio:</strong> <span id="resumen-folio">Se generará automáticamente</span>
+                        </div>
+                        <div class="resumen-item">
+                            <strong>Estudiante:</strong> <span id="resumen-estudiante">N/A</span>
+                        </div>
+                        <div class="resumen-item">
+                            <strong>Carrera:</strong> <span id="resumen-carrera">N/A</span>
+                        </div>
+                        <div class="resumen-item">
+                            <strong>Monto del adeudo:</strong> <span id="resumen-adeudo">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="folio-actions">
+                        <button type="button" id="regenerar-folios" class="btn-secondary">
+                            <i class="fas fa-sync-alt"></i>
+                            Regenerar Numeración Completa
+                        </button>
+                        <button type="button" id="registrar-devolucion" class="btn-primary">
+                            <i class="fas fa-save"></i>
+                            Registrar Devolución
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Búsqueda Page -->
+            <div class="page" id="busqueda">
+                <div class="page-header">
+                    <h1>Búsqueda de Estudiantes</h1>
+                    <p>Búsqueda por Folio, Nombre o Matrícula</p>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Buscar Estudiante">
+                        <p class="search-help">Busque por <strong>folio</strong> (ej. 0001), <strong>matrícula</strong> (ej. S22007409) o <strong>nombre</strong> (ej. Juan Pérez)</p>
+                    </div>
+
+                    <div class="search-term">
+                        <p>Término de Búsqueda</p>
+                        <div class="search-result" id="search-result">
+                            Ej. 0001, S22007409 o Juan Pérez
+                        </div>
+                        <button id="buscar-btn" class="btn-primary">Buscar</button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section" id="results-section" style="display: none;">
+                    <h3>Resultados de Búsqueda</h3>
+                    <div class="student-cards" id="student-cards">
+                        <!-- Los resultados se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes Page -->
+            <div class="page" id="reportes">
+                <div class="page-header">
+                    <h1>Reportes y Dashboard</h1>
+                    <p>Análisis de Devoluciones y Adeudos</p>
+                </div>
+
+                <!-- Stats Summary -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="report-total">0</h3>
+                            <p>Total Devoluciones</p>
+                            <small>Libros devueltos</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="report-adeudos">0</h3>
+                            <p>Devoluciones con Adeudo</p>
+                            <small>Con retraso</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="report-tiempo">0</h3>
+                            <p>Devoluciones sin Adeudo</p>
+                            <small>A tiempo</small>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon orange">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="report-ingresos">$0</h3>
+                            <p>Ingresos por Adeudos</p>
+                            <small>Total recaudado</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Devoluciones por Estado</h3>
+                        <p>Distribución de devoluciones con y sin adeudo</p>
+                        <div class="chart-container">
+                            <canvas id="estadoChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3>Adeudos por Mes</h3>
+                        <p>Monitoreo general de adeudos por mes del año</p>
+                        <div class="chart-container scrollable-chart">
+                            <canvas id="ingresosChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Estudiantes -->
+                <div class="students-list-section">
+                    <h3>Lista de Estudiantes Registrados</h3>
+                    <p>Todos los estudiantes con devoluciones registradas y opción de generar PDF</p>
+                    
+                    <div class="students-table-container">
+                        <div class="table-header">
+                            <div class="header-item">Folio</div>
+                            <div class="header-item">Estudiante</div>
+                            <div class="header-item">Carrera</div>
+                            <div class="header-item">Estado</div>
+                            <div class="header-item">Acciones</div>
+                        </div>
+                        <div class="table-body" id="students-table">
+                            <!-- Los estudiantes se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Estudiante -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Registro de Estudiante</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="edit-folio">Folio</label>
+                        <input type="text" id="edit-folio" placeholder="Ej. 0001">
+                        <small class="field-help">Formato: 4 dígitos (0001, 0002, etc.). Debe ser único.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-matricula">Matrícula</label>
+                        <input type="text" id="edit-matricula" placeholder="Ej. S22007409">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-nombre">Nombre del Estudiante</label>
+                        <input type="text" id="edit-nombre" placeholder="Ej. Juan Pérez">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-carrera">Carrera</label>
+                        <select id="edit-carrera">
+                            <option value="">Seleccionar carrera</option>
+                            <option value="Administración de Sistemas de Salud">Administración de Sistemas de Salud</option>
+                            <option value="Agroecología y Soberanía Alimentaria">Agroecología y Soberanía Alimentaria</option>
+                            <option value="Agronegocios Internacionales">Agronegocios Internacionales</option>
+                            <option value="Anestesiología">Anestesiología</option>
+                            <option value="Arquitectura">Arquitectura</option>
+                            <option value="Biología">Biología</option>
+                            <option value="Biología Marina">Biología Marina</option>
+                            <option value="Ciencias Agropecuarias">Ciencias Agropecuarias</option>
+                            <option value="Ciencias de la Ingeniería">Ciencias de la Ingeniería</option>
+                            <option value="Ciencias del Ambiente">Ciencias del Ambiente</option>
+                            <option value="Ciencias Marinas y Costeras">Ciencias Marinas y Costeras</option>
+                            <option value="Cirugía General">Cirugía General</option>
+                            <option value="Cirujano Dentista">Cirujano Dentista</option>
+                            <option value="Contaduría">Contaduría</option>
+                            <option value="Derecho">Derecho</option>
+                            <option value="Derecho con Enfoque de Pluralismo Jurídico">Derecho con Enfoque de Pluralismo Jurídico</option>
+                            <option value="Dirección Empresarial">Dirección Empresarial</option>
+                            <option value="Dirección Estratégica de Recursos Humanos">Dirección Estratégica de Recursos Humanos</option>
+                            <option value="Enfermería">Enfermería</option>
+                            <option value="Enseñanza de las Artes">Enseñanza de las Artes</option>
+                            <option value="Epidemiología">Epidemiología</option>
+                            <option value="Gestión Ambiental para la Sustentabilidad">Gestión Ambiental para la Sustentabilidad</option>
+                            <option value="Gestión del Aprendizaje">Gestión del Aprendizaje</option>
+                            <option value="Gestión e Impacto Ambiental">Gestión e Impacto Ambiental</option>
+                            <option value="Gestión Intercultural">Gestión Intercultural</option>
+                            <option value="Gestión Intercultural para el Desarrollo">Gestión Intercultural para el Desarrollo</option>
+                            <option value="Gestión y Dirección de Negocios">Gestión y Dirección de Negocios</option>
+                            <option value="Ginecología y Obstetricia">Ginecología y Obstetricia</option>
+                            <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+                            <option value="Ingeniería Civil">Ingeniería Civil</option>
+                            <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+                            <option value="Ingeniería en Electrónica y Comunicaciones">Ingeniería en Electrónica y Comunicaciones</option>
+                            <option value="Ingeniería en Tecnologías Computacionales">Ingeniería en Tecnologías Computacionales</option>
+                            <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                            <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+                            <option value="Ingeniería Mecánica Eléctrica">Ingeniería Mecánica Eléctrica</option>
+                            <option value="Ingeniería Petrolera">Ingeniería Petrolera</option>
+                            <option value="Ingeniería Química">Ingeniería Química</option>
+                            <option value="Ingeniero Agrónomo">Ingeniero Agrónomo</option>
+                            <option value="Manejo de Ecosistemas Marinos y Costeros">Manejo de Ecosistemas Marinos y Costeros</option>
+                            <option value="Medicina de Urgencias">Medicina de Urgencias</option>
+                            <option value="Medicina del Enfermo en Estado Crítico">Medicina del Enfermo en Estado Crítico</option>
+                            <option value="Medicina Familiar">Medicina Familiar</option>
+                            <option value="Medicina Interna">Medicina Interna</option>
+                            <option value="Médico Cirujano">Médico Cirujano</option>
+                            <option value="Médico Veterinario Zootecnista">Médico Veterinario Zootecnista</option>
+                            <option value="Ortopedia">Ortopedia</option>
+                            <option value="Pedagogía">Pedagogía</option>
+                            <option value="Pediatría">Pediatría</option>
+                            <option value="Psicología">Psicología</option>
+                            <option value="Sistemas Computacionales Administrativos">Sistemas Computacionales Administrativos</option>
+                            <option value="Trabajo Social">Trabajo Social</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-monto-adeudo">Monto del Adeudo ($)</label>
+                        <input type="number" id="edit-monto-adeudo" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelEdit">Cancelar</button>
+                <button type="button" class="btn-primary" id="saveEdit">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Previsualizar PDF -->
+    <div id="pdfModal" class="modal pdf-modal">
+        <div class="modal-content pdf-modal-content">
+            <div class="modal-header">
+                <h2>Previsualizar Comprobante</h2>
+                <div class="pdf-controls">
+                    <button type="button" class="btn-primary" id="downloadPdf">
+                        <i class="fas fa-download"></i> Descargar PDF
+                    </button>
+                    <span class="close-modal">&times;</span>
+                </div>
+            </div>
+            <div class="modal-body pdf-preview">
+                <iframe id="pdfViewer" style="width: 100%; height: 600px; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación para Eliminar -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h2>Confirmar Eliminación</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p><strong>¿Estás seguro de eliminar este registro?</strong></p>
+                <p id="deleteStudentInfo">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelDelete">Cancelar</button>
+                <button type="button" class="btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
