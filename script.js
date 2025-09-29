@@ -1,8 +1,11 @@
-// Sistema de Control de Biblioteca - JavaScript
+// Sistema de Control de Biblioteca - JavaScript with Backend API
 /* global Chart */
 
-// Array de estudiantes - inicializado vacío para uso en producción
-const estudiantes = [];
+// API Configuration - Update this to your server's URL
+const API_BASE_URL = 'http://ubiuv.duckdns.org/biblioteca/api';
+
+// Array de estudiantes - now loaded from database
+let estudiantes = [];
 
 // Variables globales
 let currentPage = 'dashboard';
