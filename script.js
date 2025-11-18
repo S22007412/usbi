@@ -175,16 +175,10 @@ function updateActiveMenu(pageName) {
 // Manejo de formularios
 function initializeFormHandlers() {
     const registrarBtn = document.getElementById('registrar-devolucion');
-    const regenerarBtn = document.getElementById('regenerar-folios');
 
     // Registrar devolución
     registrarBtn.addEventListener('click', function() {
         registrarDevolucion();
-    });
-
-    // Regenerar folios
-    regenerarBtn.addEventListener('click', function() {
-        regenerarFolios();
     });
 
     // Actualizar resumen cuando cambien los campos
@@ -331,28 +325,6 @@ function clearForm() {
     document.getElementById('carrera').value = '';
     document.getElementById('monto-adeudo').value = '';
     updateResumen();
-}
-
-// Nueva función para regenerar folios
-async function regenerarFolios() {
-    if (estudiantes.length === 0) {
-        alert('No hay registros para regenerar folios');
-        return;
-    }
-
-    const confirmacion = confirm(
-        '⚠️ ADVERTENCIA: Esta acción renumerará TODOS los folios existentes en orden secuencial (0001, 0002, 0003...).\n\n' +
-        '🔹 Se mantendrá el orden actual de registros\n' +
-        '🔹 Los PDFs existentes quedarán con los folios antiguos\n' +
-        '🔹 Esta acción NO se puede deshacer\n\n' +
-        '¿Está seguro que desea continuar?'
-    );
-
-    if (!confirmacion) return;
-
-    // Note: This functionality would need to be implemented in the backend
-    // For now, we'll reload the data
-    showSuccessMessage('Funcionalidad de regeneración de folios pendiente de implementación en el backend', 'info');
 }
 
 // Búsqueda
