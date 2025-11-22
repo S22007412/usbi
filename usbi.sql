@@ -3,8 +3,8 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 29, 2025 at 07:41 AM
--- Server version: 8.0.43-0ubuntu0.24.04.2
+-- Generation Time: Nov 22, 2025 at 07:33 AM
+-- Server version: 8.0.44-0ubuntu0.24.04.1
 -- PHP Version: 8.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -140,102 +140,21 @@ CREATE TABLE `estudiantes` (
   `fecha_registro` datetime DEFAULT CURRENT_TIMESTAMP,
   `hora_registro` time DEFAULT NULL,
   `fecha_creacion` datetime DEFAULT CURRENT_TIMESTAMP,
-  `fecha_actualizacion` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `activo` tinyint(1) DEFAULT '1'
+  `fecha_actualizacion` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Triggers `estudiantes`
---
-DELIMITER $$
-CREATE TRIGGER `trigger_estudiantes_delete` AFTER DELETE ON `estudiantes` FOR EACH ROW BEGIN
-    INSERT INTO historial_cambios (
-        estudiante_id,
-        accion,
-        datos_anteriores,
-        fecha_cambio
-    ) VALUES (
-        OLD.id,
-        'DELETE',
-        JSON_OBJECT(
-            'folio', OLD.folio,
-            'matricula', OLD.matricula,
-            'nombre', OLD.nombre,
-            'carrera', OLD.carrera,
-            'adeudo', OLD.adeudo,
-            'estado', OLD.estado
-        ),
-        NOW()
-    )$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trigger_estudiantes_insert` AFTER INSERT ON `estudiantes` FOR EACH ROW BEGIN
-    INSERT INTO historial_cambios (
-        estudiante_id, 
-        accion, 
-        datos_nuevos, 
-        fecha_cambio
-    ) VALUES (
-        NEW.id,
-        'INSERT',
-        JSON_OBJECT(
-            'folio', NEW.folio,
-            'matricula', NEW.matricula,
-            'nombre', NEW.nombre,
-            'carrera', NEW.carrera,
-            'adeudo', NEW.adeudo,
-            'estado', NEW.estado
-        ),
-        NOW()
-    )$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `trigger_estudiantes_update` AFTER UPDATE ON `estudiantes` FOR EACH ROW BEGIN
-    INSERT INTO historial_cambios (
-        estudiante_id,
-        accion,
-        datos_anteriores,
-        datos_nuevos,
-        fecha_cambio
-    ) VALUES (
-        NEW.id,
-        'UPDATE',
-        JSON_OBJECT(
-            'folio', OLD.folio,
-            'matricula', OLD.matricula,
-            'nombre', OLD.nombre,
-            'carrera', OLD.carrera,
-            'adeudo', OLD.adeudo,
-            'estado', OLD.estado
-        ),
-        JSON_OBJECT(
-            'folio', NEW.folio,
-            'matricula', NEW.matricula,
-            'nombre', NEW.nombre,
-            'carrera', NEW.carrera,
-            'adeudo', NEW.adeudo,
-            'estado', NEW.estado
-        ),
-        NOW()
-    )$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `historial_cambios`
+-- Dumping data for table `estudiantes`
 --
 
-CREATE TABLE `historial_cambios` (
-  `id` int NOT NULL,
-  `estudiante_id` int DEFAULT NULL,
-  `accion` varchar(20) NOT NULL,
-  `datos_anteriores` text,
-  `datos_nuevos` text,
-  `usuario` varchar(50) DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `fecha_cambio` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+INSERT INTO `estudiantes` (`id`, `folio`, `matricula`, `nombre`, `carrera`, `adeudo`, `estado`, `fecha_registro`, `hora_registro`, `fecha_creacion`, `fecha_actualizacion`) VALUES
+(1, 'No.0001', 'S22007411', 'Paola Dexiree', 'Cirujano Dentista', 20.00, 'con_adeudo', '2025-09-29 09:30:17', '09:30:17', '2025-09-29 09:30:17', '2025-10-06 05:54:45'),
+(2, 'No.0002', 'S22007412', 'José Alan Sotelo Meseguer', 'Ingeniería en Tecnologías Computacionales', 0.00, 'sin_adeudo', '2025-09-29 12:30:40', '12:30:40', '2025-09-29 12:30:40', '2025-10-06 05:09:28'),
+(3, 'No.0003', 'S23007432', 'Juan Pérez', 'Epidemiología', 5.00, 'con_adeudo', '2025-10-06 05:16:14', '05:16:14', '2025-10-06 05:16:14', '2025-10-06 05:17:13'),
+(4, 'No.0004', 'S21001123', 'Louis Ramírez', 'Derecho', 0.00, 'sin_adeudo', '2025-10-06 05:16:50', '05:16:50', '2025-10-06 05:16:50', '2025-10-06 05:16:58'),
+(10, 'No.0005', 'S220074124', 'Mario Hernandez', 'Ingeniería en Electrónica y Comunicaciones', 0.00, 'sin_adeudo', '2025-10-06 05:44:46', '05:44:46', '2025-10-06 05:44:46', '2025-11-06 23:53:54'),
+(18, 'No.0006', 'S22007409', 'Eder Salas', 'Ingeniería en Tecnologías Computacionales', 0.00, 'sin_adeudo', '2025-11-22 13:27:23', '07:27:23', '2025-11-22 13:27:23', '2025-11-22 13:27:23'),
+(19, 'No.0007', 'S22007401', 'rodo', 'Derecho con Enfoque de Pluralismo Jurídico', 0.00, 'sin_adeudo', '2025-11-22 13:29:36', '07:29:36', '2025-11-22 13:29:36', '2025-11-22 13:29:36');
 
 -- --------------------------------------------------------
 
@@ -287,7 +206,7 @@ CREATE TABLE `vista_estadisticas` (
 --
 DROP TABLE IF EXISTS `vista_adeudos_por_mes`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_adeudos_por_mes`  AS SELECT year(`estudiantes`.`fecha_registro`) AS `año`, lpad(month(`estudiantes`.`fecha_registro`),2,'0') AS `mes`, date_format(`estudiantes`.`fecha_registro`,'%Y-%m') AS `año_mes`, count(0) AS `total_registros`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudo_mes` FROM `estudiantes` WHERE (`estudiantes`.`activo` = 1) GROUP BY date_format(`estudiantes`.`fecha_registro`,'%Y-%m') ORDER BY `año_mes` ASC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`usbi`@`%` SQL SECURITY DEFINER VIEW `vista_adeudos_por_mes`  AS SELECT year(`estudiantes`.`fecha_registro`) AS `año`, lpad(month(`estudiantes`.`fecha_registro`),2,'0') AS `mes`, date_format(`estudiantes`.`fecha_registro`,'%Y-%m') AS `año_mes`, count(0) AS `total_registros`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudo_mes` FROM `estudiantes` GROUP BY date_format(`estudiantes`.`fecha_registro`,'%Y-%m') ORDER BY `año_mes` ASC ;
 
 -- --------------------------------------------------------
 
@@ -296,7 +215,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `vista_carreras_adeudos`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_carreras_adeudos`  AS SELECT `estudiantes`.`carrera` AS `carrera`, count(0) AS `total_estudiantes`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudo_carrera`, coalesce(avg(`estudiantes`.`adeudo`),0) AS `promedio_adeudo_carrera` FROM `estudiantes` WHERE (`estudiantes`.`activo` = 1) GROUP BY `estudiantes`.`carrera` ORDER BY `total_adeudo_carrera` DESC ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`usbi`@`%` SQL SECURITY DEFINER VIEW `vista_carreras_adeudos`  AS SELECT `estudiantes`.`carrera` AS `carrera`, count(0) AS `total_estudiantes`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudo_carrera`, coalesce(avg(`estudiantes`.`adeudo`),0) AS `promedio_adeudo_carrera` FROM `estudiantes` GROUP BY `estudiantes`.`carrera` ORDER BY `total_adeudo_carrera` DESC ;
 
 -- --------------------------------------------------------
 
@@ -305,7 +224,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `vista_estadisticas`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_estadisticas`  AS SELECT count(0) AS `total_devoluciones`, count((case when (`estudiantes`.`estado` = 'sin_adeudo') then 1 end)) AS `sin_adeudo`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudos`, coalesce(avg(`estudiantes`.`adeudo`),0) AS `promedio_adeudo` FROM `estudiantes` WHERE (`estudiantes`.`activo` = 1) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`usbi`@`%` SQL SECURITY DEFINER VIEW `vista_estadisticas`  AS SELECT count(0) AS `total_devoluciones`, count((case when (`estudiantes`.`estado` = 'sin_adeudo') then 1 end)) AS `sin_adeudo`, count((case when (`estudiantes`.`estado` = 'con_adeudo') then 1 end)) AS `con_adeudo`, coalesce(sum(`estudiantes`.`adeudo`),0) AS `total_adeudos`, coalesce(avg(`estudiantes`.`adeudo`),0) AS `promedio_adeudo` FROM `estudiantes` ;
 
 --
 -- Indexes for dumped tables
@@ -341,15 +260,6 @@ ALTER TABLE `estudiantes`
   ADD KEY `idx_estudiantes_fecha_registro` (`fecha_registro`);
 
 --
--- Indexes for table `historial_cambios`
---
-ALTER TABLE `historial_cambios`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_historial_estudiante_id` (`estudiante_id`),
-  ADD KEY `idx_historial_fecha` (`fecha_cambio`),
-  ADD KEY `idx_historial_accion` (`accion`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -363,23 +273,7 @@ ALTER TABLE `carreras`
 -- AUTO_INCREMENT for table `estudiantes`
 --
 ALTER TABLE `estudiantes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `historial_cambios`
---
-ALTER TABLE `historial_cambios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `historial_cambios`
---
-ALTER TABLE `historial_cambios`
-  ADD CONSTRAINT `historial_cambios_ibfk_1` FOREIGN KEY (`estudiante_id`) REFERENCES `estudiantes` (`id`);
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
