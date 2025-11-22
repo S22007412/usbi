@@ -41,7 +41,8 @@ class StudentsAPI {
     }
     
     private function getStudents() {
-        $query = "SELECT * FROM estudiantes WHERE activo = 1 ORDER BY fecha_registro DESC";
+        // Remove activo filter since we're now using hard deletes
+        $query = "SELECT * FROM estudiantes ORDER BY fecha_registro DESC";
         $stmt = $this->connection->prepare($query);
         $stmt->execute();
         $students = $stmt->fetchAll();
@@ -142,9 +143,9 @@ class StudentsAPI {
             sendErrorResponse(implode(', ', $errors));
         }
         
-        // Check if folio is unique (excluding current record)
+        // Check if folio is unique (excluding current record) - remove activo check
         if (isset($input['folio'])) {
-            $folioCheck = "SELECT id FROM estudiantes WHERE folio = :folio AND id != :id AND activo = 1";
+            $folioCheck = "SELECT id FROM estudiantes WHERE folio = :folio AND id != :id";
             $stmt = $this->connection->prepare($folioCheck);
             $stmt->bindParam(':folio', $input['folio']);
             $stmt->bindParam(':id', $input['id']);
@@ -162,9 +163,10 @@ class StudentsAPI {
         $estado = $adeudo > 0 ? 'con_adeudo' : 'sin_adeudo';
         $folio = $input['folio'];
         
+        // Remove activo filter from update query
         $query = "UPDATE estudiantes SET folio = :folio, matricula = :matricula, nombre = :nombre, 
                  carrera = :carrera, adeudo = :adeudo, estado = :estado 
-                 WHERE id = :id AND activo = 1";
+                 WHERE id = :id";
         
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':id', $input['id']);
@@ -192,8 +194,8 @@ class StudentsAPI {
             sendErrorResponse("ID de estudiante requerido");
         }
         
-        // Soft delete
-        $query = "UPDATE estudiantes SET activo = 0 WHERE id = :id";
+        // Hard delete - actually remove the record from database
+        $query = "DELETE FROM estudiantes WHERE id = :id";
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':id', $input['id']);
         
@@ -208,34 +210,34 @@ class StudentsAPI {
     }
     
     private function generateFolio($customFolio = null) {
-    if ($customFolio && !empty(trim($customFolio))) {
-        // Use provided folio, ensure format
-        $folioNumber = str_replace('No.', '', trim($customFolio));
-        $folioNumber = str_pad($folioNumber, 4, '0', STR_PAD_LEFT);
-        $folio = "No." . $folioNumber;
-        
-        // Check if it already exists in active records only
-        $query = "SELECT id FROM estudiantes WHERE folio = :folio AND activo = 1";
-        $stmt = $this->connection->prepare($query);
-        $stmt->bindParam(':folio', $folio);
-        $stmt->execute();
-        
-        if ($stmt->fetch()) {
-            throw new Exception("El folio ya existe");
+        if ($customFolio && !empty(trim($customFolio))) {
+            // Use provided folio, ensure format
+            $folioNumber = str_replace('No.', '', trim($customFolio));
+            $folioNumber = str_pad($folioNumber, 4, '0', STR_PAD_LEFT);
+            $folio = "No." . $folioNumber;
+            
+            // Check if it already exists - remove activo check since we're using hard deletes
+            $query = "SELECT id FROM estudiantes WHERE folio = :folio";
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(':folio', $folio);
+            $stmt->execute();
+            
+            if ($stmt->fetch()) {
+                throw new Exception("El folio ya existe");
+            }
+            
+            return $folio;
+        } else {
+            // Generate next available folio - look at ALL records to avoid conflicts
+            $query = "SELECT MAX(CAST(SUBSTRING(folio, 4) AS UNSIGNED)) as max_folio FROM estudiantes";
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch();
+            
+            $nextNumber = ($result['max_folio'] ?? 0) + 1;
+            return "No." . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
-        
-        return $folio;
-    } else {
-        // Generate next available folio - look at ALL records to avoid conflicts
-        $query = "SELECT MAX(CAST(SUBSTRING(folio, 4) AS UNSIGNED)) as max_folio FROM estudiantes";
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        
-        $nextNumber = ($result['max_folio'] ?? 0) + 1;
-        return "No." . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
-}
 }
 
 $api = new StudentsAPI();

@@ -388,6 +388,81 @@
                     </div>
                 </div>
 
+                <!-- Reportes PDF Section -->
+                <div class="pdf-reports-section">
+                    <h3>Reportes PDF</h3>
+                    <p>Genere reportes detallados en formato PDF</p>
+                    
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <div class="report-icon">
+                                <i class="fas fa-calendar-month"></i>
+                            </div>
+                            <div class="report-content">
+                                <h4>Reporte por Mes</h4>
+                                <p>Generar reporte de pagos de un mes específico</p>
+                                
+                                <div class="form-group">
+                                    <label for="month-select">Seleccionar Mes:</label>
+                                    <select id="month-select" class="report-select">
+                                        <option value="">Seleccionar mes...</option>
+                                        <option value="01">Enero</option>
+                                        <option value="02">Febrero</option>
+                                        <option value="03">Marzo</option>
+                                        <option value="04">Abril</option>
+                                        <option value="05">Mayo</option>
+                                        <option value="06">Junio</option>
+                                        <option value="07">Julio</option>
+                                        <option value="08">Agosto</option>
+                                        <option value="09">Septiembre</option>
+                                        <option value="10">Octubre</option>
+                                        <option value="11">Noviembre</option>
+                                        <option value="12">Diciembre</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="year-select">Seleccionar Año:</label>
+                                    <select id="year-select" class="report-select">
+                                        <option value="">Seleccionar año...</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                </div>
+                                
+                                <button type="button" id="generate-monthly-report" class="btn-report">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Generar Reporte Mensual
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="report-card">
+                            <div class="report-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="report-content">
+                                <h4>Reporte por Carrera</h4>
+                                <p>Generar reporte de pagos por carrera universitaria</p>
+                                
+                                <div class="form-group">
+                                    <label for="carrera-select">Seleccionar Carrera:</label>
+                                    <select id="carrera-select" class="report-select">
+                                        <option value="">Seleccionar carrera...</option>
+                                        <!-- Las carreras se cargarán dinámicamente -->
+                                    </select>
+                                </div>
+                                
+                                <button type="button" id="generate-career-report" class="btn-report">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Generar Reporte por Carrera
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Lista de Estudiantes -->
                 <div class="students-list-section">
                     <h3>Lista de Estudiantes Registrados</h3>

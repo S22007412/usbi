@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadStudents();
     initializeCharts();
+    initializeReportsHandlers();
+    loadCarrerasForReports();
 });
 
 // Navegación entre páginas
@@ -179,14 +181,7 @@ function initializeFormHandlers() {
     // Registrar devolución
     registrarBtn.addEventListener('click', function() {
         registrarDevolucion();
-    });
-
-    // Actualizar resumen cuando cambien los campos
-    const formInputs = document.querySelectorAll('#registro input, #registro select');
-    formInputs.forEach(input => {
-        input.addEventListener('input', updateResumen);
-    });
-}
+    });}
 
 function updateCurrentFolio() {
     const folioElement = document.getElementById('current-folio');
@@ -1063,10 +1058,12 @@ function generatePDFContent(doc, estudiante) {
     
     // Hora de registro en lugar de fecha de devolución
     const horaRegistro = estudiante.horaRegistro || new Date().toLocaleTimeString('es-ES', { 
+        timeZone: 'America/Mexico_City',
         hour: '2-digit', 
         minute: '2-digit', 
-        second: '2-digit' 
+        second: '2-digit'
     });
+
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
     
     // Adeudo (destacado)
@@ -1092,8 +1089,14 @@ function generatePDFContent(doc, estudiante) {
     doc.setFont("helvetica", "normal");
     
     yPosition = addField('Número de recibo', estudiante.folio.replace('No.', ''), yPosition);
-    yPosition = addField('Fecha de emisión', formatDateForPDF(new Date().toISOString().split('T')[0]), yPosition);
-    
+    const fechaEmision = new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'America/Mexico_City',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(new Date());
+
+    yPosition = addField('Fecha de emisión', fechaEmision, yPosition);
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(127, 140, 141);
@@ -1112,4 +1115,291 @@ function formatDateForPDF(dateString) {
         month: 'numeric',
         year: 'numeric'
     });
+}
+
+// ===============================================
+// PDF REPORTS FUNCTIONALITY
+// ===============================================
+
+// Initialize reports handlers
+function initializeReportsHandlers() {
+    const monthlyReportBtn = document.getElementById('generate-monthly-report');
+    const careerReportBtn = document.getElementById('generate-career-report');
+    
+    if (monthlyReportBtn) {
+        monthlyReportBtn.addEventListener('click', generateMonthlyReport);
+    }
+    
+    if (careerReportBtn) {
+        careerReportBtn.addEventListener('click', generateCareerReport);
+    }
+}
+
+// Load carreras for the dropdown
+async function loadCarrerasForReports() {
+    try {
+        const response = await apiRequest('carreras');
+        const carreraSelect = document.getElementById('carrera-select');
+        
+        if (carreraSelect && response.success) {
+            // Clear existing options except the first one
+            carreraSelect.innerHTML = '<option value="">Seleccionar carrera...</option>';
+            
+            // Add carreras to the select
+            response.data.forEach(carrera => {
+                if (carrera.activa) {
+                    const option = document.createElement('option');
+                    option.value = carrera.nombre;
+                    option.textContent = carrera.nombre;
+                    carreraSelect.appendChild(option);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading carreras for reports:', error);
+    }
+}
+
+// Generate monthly report
+async function generateMonthlyReport() {
+    const month = document.getElementById('month-select').value;
+    const year = document.getElementById('year-select').value;
+    
+    if (!month || !year) {
+        alert('Por favor, seleccione mes y año');
+        return;
+    }
+    
+    try {
+        showLoading('Generando reporte mensual...');
+        
+        const response = await apiRequest(`reports?type=monthly&month=${month}&year=${year}`);
+        
+        if (response.success) {
+            generateMonthlyPDF(response.data);
+            showSuccessMessage(`Reporte mensual generado para ${response.data.period.displayName}`);
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al generar reporte mensual: ' + error.message);
+    }
+}
+
+// Generate career report
+async function generateCareerReport() {
+    const carrera = document.getElementById('carrera-select').value;
+    
+    if (!carrera) {
+        alert('Por favor, seleccione una carrera');
+        return;
+    }
+    
+    try {
+        showLoading('Generando reporte por carrera...');
+        
+        const response = await apiRequest(`reports?type=career&carrera=${encodeURIComponent(carrera)}`);
+        
+        if (response.success) {
+            generateCareerPDF(response.data);
+            showSuccessMessage(`Reporte generado para la carrera: ${carrera}`);
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al generar reporte por carrera: ' + error.message);
+    }
+}
+
+// Generate monthly PDF
+function generateMonthlyPDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor(44, 62, 80);
+    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(16);
+    doc.text('REPORTE MENSUAL DE PAGOS', 105, 35, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setTextColor(52, 73, 94);
+    doc.text(`Período: ${data.period.displayName}`, 105, 50, { align: 'center' });
+    
+    // Línea separadora
+    doc.setDrawColor(149, 165, 166);
+    doc.line(20, 60, 190, 60);
+    
+    // Summary statistics
+    let yPos = 80;
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    
+    const addSummaryField = (label, value, y) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${label}:`, 25, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, 120, y);
+        return y + 10;
+    };
+    
+    yPos = addSummaryField('Total de Estudiantes', data.summary.totalStudents.toString(), yPos);
+    yPos = addSummaryField('Estudiantes con Adeudo', data.summary.studentsWithDebt.toString(), yPos);
+    yPos = addSummaryField('Estudiantes sin Adeudo', data.summary.studentsWithoutDebt.toString(), yPos);
+    yPos = addSummaryField('Total de Adeudos', `$${data.summary.totalDebt.toFixed(2)}`, yPos);
+    yPos = addSummaryField('Promedio de Adeudo', `$${data.summary.averageDebt.toFixed(2)}`, yPos);
+    
+    yPos += 10;
+    
+    // Students table header
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.setFillColor(59, 130, 246);
+    doc.rect(20, yPos, 170, 10, 'F');
+    
+    doc.text('Folio', 25, yPos + 7);
+    doc.text('Nombre', 50, yPos + 7);
+    doc.text('Carrera', 100, yPos + 7);
+    doc.text('Adeudo', 150, yPos + 7);
+    
+    yPos += 15;
+    
+    // Students data
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(44, 62, 80);
+    
+    data.students.forEach((student, index) => {
+        if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        const rowColor = index % 2 === 0 ? [248, 250, 252] : [255, 255, 255];
+        doc.setFillColor(...rowColor);
+        doc.rect(20, yPos - 5, 170, 10, 'F');
+        
+        doc.text(student.folio, 25, yPos + 2);
+        doc.text(student.nombre.substring(0, 20), 50, yPos + 2);
+        doc.text(student.carrera.substring(0, 25), 100, yPos + 2);
+        doc.text(`$${student.adeudo.toFixed(2)}`, 150, yPos + 2);
+        
+        yPos += 10;
+    });
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(127, 140, 141);
+        doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+        doc.text(`Generado el ${formatDateForPDF(new Date().toISOString())}`, 190, 290, { align: 'right' });
+    }
+    
+    // Save PDF
+    const fileName = `Reporte_Mensual_${data.period.monthName}_${data.period.year}.pdf`;
+    doc.save(fileName);
+}
+
+// Generate career PDF
+function generateCareerPDF(data) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor(44, 62, 80);
+    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 20, { align: 'center' });
+    
+    doc.setFontSize(16);
+    doc.text('REPORTE POR CARRERA', 105, 35, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.setTextColor(52, 73, 94);
+    doc.text(`Carrera: ${data.carrera}`, 105, 50, { align: 'center' });
+    
+    // Línea separadora
+    doc.setDrawColor(149, 165, 166);
+    doc.line(20, 60, 190, 60);
+    
+    // Summary statistics
+    let yPos = 80;
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    
+    const addSummaryField = (label, value, y) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(`${label}:`, 25, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(value, 120, y);
+        return y + 10;
+    };
+    
+    yPos = addSummaryField('Total de Estudiantes', data.summary.totalStudents.toString(), yPos);
+    yPos = addSummaryField('Estudiantes con Adeudo', data.summary.studentsWithDebt.toString(), yPos);
+    yPos = addSummaryField('Estudiantes sin Adeudo', data.summary.studentsWithoutDebt.toString(), yPos);
+    yPos = addSummaryField('Total de Adeudos', `$${data.summary.totalDebt.toFixed(2)}`, yPos);
+    yPos = addSummaryField('Promedio de Adeudo', `$${data.summary.averageDebt.toFixed(2)}`, yPos);
+    
+    yPos += 10;
+    
+    // Students table header
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text('Lista de Estudiantes:', 25, yPos);
+    yPos += 15;
+    
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.setFillColor(59, 130, 246);
+    doc.rect(20, yPos, 170, 10, 'F');
+    
+    doc.text('Folio', 25, yPos + 7);
+    doc.text('Nombre', 50, yPos + 7);
+    doc.text('Matrícula', 100, yPos + 7);
+    doc.text('Adeudo', 150, yPos + 7);
+    
+    yPos += 15;
+    
+    // Students data
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(44, 62, 80);
+    
+    data.students.forEach((student, index) => {
+        if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+        }
+        
+        const rowColor = index % 2 === 0 ? [248, 250, 252] : [255, 255, 255];
+        doc.setFillColor(...rowColor);
+        doc.rect(20, yPos - 5, 170, 10, 'F');
+        
+        doc.text(student.folio, 25, yPos + 2);
+        doc.text(student.nombre.substring(0, 20), 50, yPos + 2);
+        doc.text(student.matricula, 100, yPos + 2);
+        doc.text(`$${student.adeudo.toFixed(2)}`, 150, yPos + 2);
+        
+        yPos += 10;
+    });
+    
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(127, 140, 141);
+        doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
+        doc.text(`Generado el ${formatDateForPDF(new Date().toISOString())}`, 190, 290, { align: 'right' });
+    }
+    
+    // Save PDF
+    const fileName = `Reporte_Carrera_${data.carrera.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
 }

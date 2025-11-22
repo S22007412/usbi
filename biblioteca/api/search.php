@@ -39,8 +39,7 @@ class SearchAPI {
         $searchPattern = "%{$searchTerm}%";
         
         $query = "SELECT * FROM estudiantes 
-                 WHERE activo = 1 
-                 AND (folio LIKE :term1 
+                 WHERE (folio LIKE :term1 
                       OR matricula LIKE :term2 
                       OR nombre LIKE :term3)
                  ORDER BY fecha_registro DESC";
