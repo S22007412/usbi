@@ -1,6 +1,5 @@
 // Sistema de Control de Biblioteca - JavaScript with Backend API
 /* global Chart */
-// test change
 
 // API Configuration - Update this to your server's URL
 const API_BASE_URL = 'http://ubiuv.duckdns.org/biblioteca/api';
