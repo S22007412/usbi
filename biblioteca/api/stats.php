@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json');
-require_once 'conexion.php';
+require_once '../config/database.php';
+require_once '../includes/cors.php';
 
 try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
