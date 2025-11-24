@@ -1,0 +1,35 @@
+RewriteEngine On
+
+# Enable CORS for all requests
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+# Handle preflight requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# API Routes
+RewriteRule ^api/students/?$ api/students.php [L]
+RewriteRule ^api/stats/?$ api/stats.php [L]
+RewriteRule ^api/search/?$ api/search.php [L]
+RewriteRule ^api/config/?$ api/config.php [L]
+RewriteRule ^api/carreras/?$ api/carreras.php [L]
+RewriteRule ^api/reports/?$ api/reports.php [L]
+
+# Security - Prevent access to sensitive files
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+<FilesMatch "^(config|includes)/">
+    Order deny,allow
+    Deny from all
+</FilesMatch>
+
+# Allow test connection for debugging
+<Files "test_connection.php">
+    Order allow,deny
+    Allow from all
+</Files>
