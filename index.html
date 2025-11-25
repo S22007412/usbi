@@ -32,7 +32,7 @@
                     </li>
                     <li class="menu-item" data-page="registro">
                         <i class="fas fa-undo"></i>
-                        <span>Registro de Devolución</span>
+                        <span>Pago de Cuotas</span>
                     </li>
                     <li class="menu-item" data-page="busqueda">
                         <i class="fas fa-search"></i>
@@ -109,8 +109,8 @@
                             <i class="fas fa-undo"></i>
                         </div>
                         <div class="action-content">
-                            <h3>Registro de Devolución</h3>
-                            <p>Registrar devolución con folio automático</p>
+                            <h3>Pago de Cuotas</h3>
+                            <p>Registrar pago con folio automático</p>
                         </div>
                         <button class="btn-action">Acceder</button>
                     </div>
@@ -142,7 +142,7 @@
             <!-- Registro Page -->
             <div class="page" id="registro">
                 <div class="page-header">
-                    <h1>Registro de Devolución</h1>
+                    <h1>Pago de Cuotas</h1>
                     <div class="folio-display">
                         # Folio: <span id="current-folio">0001</span>
                     </div>
@@ -151,14 +151,14 @@
                 <div class="folio-info">
                     <div class="info-box">
                         <i class="fas fa-info-circle"></i>
-                        <p><strong>Folio automático:</strong> El sistema generará automáticamente el folio. Ingrese los datos del estudiante y el monto del adeudo correspondiente.</p>
+                        <p><strong>Folio automático:</strong> El sistema generará automáticamente el folio. Ingrese los datos del estudiante y el monto de la cuota a pagar.</p>
                     </div>
                 </div>
 
                 <div class="form-container">
                     <div class="form-section">
                         <h3>Datos del Estudiante</h3>
-                        <p>Información del estudiante que realiza la devolución</p>
+                        <p>Información del estudiante que realiza el pago</p>
 
                         <div class="form-group">
                             <label for="folio-manual">Folio (Opcional - se genera automático si se deja vacío)</label>
@@ -237,18 +237,18 @@
                     </div>
 
                     <div class="form-section">
-                        <h3>Monto del Adeudo</h3>
-                        <p>Ingrese el monto total del adeudo (puede ser $0 si no hay deuda)</p>
+                        <h3>Monto de la Cuota</h3>
+                        <p>Ingrese el monto total de la cuota a pagar (o $0 si no se cobrará)</p>
 
                         <div class="form-group">
-                            <label for="monto-adeudo">Monto del Adeudo ($)</label>
+                            <label for="monto-adeudo">Monto de la Cuota ($)</label>
                             <input type="number" id="monto-adeudo" placeholder="0.00" min="0" step="0.01">
                         </div>
 
                         <div class="monto-info">
                             <div class="info-box">
                                 <i class="fas fa-info-circle"></i>
-                                <p><strong>Importante:</strong> Ingrese $0 si no hay adeudo, o el monto exacto si existe deuda pendiente.</p>
+                                <p><strong>Importante:</strong> Ingrese el monto exacto de la cuota a pagar (o $0 si no hay adeudo).</p>
                             </div>
                         </div>
                     </div>
@@ -256,8 +256,8 @@
 
                 <!-- Resumen Section -->
                 <div class="resumen-section">
-                    <h3>Resumen de Devolución</h3>
-                    <p>Confirme los datos antes de procesar la devolución</p>
+                    <h3>Resumen de Pago</h3>
+                    <p>Confirme los datos antes de procesar el cobro</p>
 
                     <div class="resumen-grid">
                         <div class="resumen-item">
@@ -270,14 +270,14 @@
                             <strong>Carrera:</strong> <span id="resumen-carrera">N/A</span>
                         </div>
                         <div class="resumen-item">
-                            <strong>Monto del adeudo:</strong> <span id="resumen-adeudo">$0.00</span>
+                            <strong>Monto a pagar:</strong> <span id="resumen-adeudo">$0.00</span>
                         </div>
                     </div>
 
                     <div class="folio-actions">
                         <button type="button" id="registrar-devolucion" class="btn-primary">
-                            <i class="fas fa-save"></i>
-                            Registrar Devolución
+                            <i class="fas fa-dollar-sign"></i>
+                            Registrar Pago
                         </button>
                     </div>
                 </div>

@@ -688,7 +688,7 @@ function updateStudentsTable() {
         studentsTable.innerHTML = `
             <div class="table-row">
                 <div class="table-cell" style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
-                    No hay registros de devoluciones
+                    No hay registros de pagos
                 </div>
             </div>
         `;
@@ -1026,7 +1026,7 @@ function generatePDFContent(doc, estudiante) {
     doc.text('BIBLIOTECA UNIVERSITARIA', 105, 30, { align: 'center' });
     
     doc.setFontSize(16);
-    doc.text('COMPROBANTE DE DEVOLUCIÓN', 105, 45, { align: 'center' });
+    doc.text('COMPROBANTE DE PAGO', 105, 45, { align: 'center' });
     
     doc.setFontSize(14);
     doc.setTextColor(52, 73, 94);
