@@ -1223,4 +1223,12 @@ body {
     margin-bottom: 6px;
 }
 
+/* CSV Button Style */
+.btn-csv {
+    background: #10b981;
+    margin-top: 8px;
+}
 
+.btn-csv:hover {
+    background: #059669;
+}

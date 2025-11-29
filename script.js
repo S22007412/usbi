@@ -1403,3 +1403,130 @@ function generateCareerPDF(data) {
     const fileName = `Reporte_Carrera_${data.carrera.replace(/\s+/g, '_')}.pdf`;
     doc.save(fileName);
 }
+
+// ===============================================
+// CSV EXPORT FUNCTIONALITY
+// ===============================================
+
+// Initialize CSV handlers
+function initializeCSVHandlers() {
+    const monthlyCsvBtn = document.getElementById('generate-monthly-csv');
+    const careerCsvBtn = document.getElementById('generate-career-csv');
+    
+    if (monthlyCsvBtn) {
+        monthlyCsvBtn.addEventListener('click', generateMonthlyCSV);
+    }
+    
+    if (careerCsvBtn) {
+        careerCsvBtn.addEventListener('click', generateCareerCSV);
+    }
+}
+
+// Generate Monthly CSV
+async function generateMonthlyCSV() {
+    const month = document.getElementById('month-select').value;
+    const year = document.getElementById('year-select').value;
+    
+    if (!month || !year) {
+        alert('Por favor, seleccione mes y año');
+        return;
+    }
+    
+    try {
+        showLoading('Generando CSV mensual...');
+        
+        const response = await apiRequest(`reports?type=monthly&month=${month}&year=${year}`);
+        
+        if (response.success) {
+            downloadCSV(response.data.students, `Reporte_Mensual_${response.data.period.displayName}`, 'monthly');
+            showSuccessMessage(`CSV mensual generado para ${response.data.period.displayName}`);
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al generar CSV mensual: ' + error.message);
+    }
+}
+
+// Generate Career CSV
+async function generateCareerCSV() {
+    const carrera = document.getElementById('carrera-select').value;
+    
+    if (!carrera) {
+        alert('Por favor, seleccione una carrera');
+        return;
+    }
+    
+    try {
+        showLoading('Generando CSV por carrera...');
+        
+        const response = await apiRequest(`reports?type=career&carrera=${encodeURIComponent(carrera)}`);
+        
+        if (response.success) {
+            downloadCSV(response.data.students, `Reporte_Carrera_${carrera}`, 'career');
+            showSuccessMessage(`CSV generado para la carrera: ${carrera}`);
+        }
+        
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al generar CSV por carrera: ' + error.message);
+    }
+}
+
+// Download CSV helper function
+function downloadCSV(students, filename, type) {
+    // CSV Headers
+    const headers = ['Folio', 'Matrícula', 'Nombre', 'Carrera', 'Cuota', 'Estado', 'Fecha', 'Hora'];
+    
+    // Build CSV content
+    let csvContent = headers.join(',') + '\n';
+    
+    students.forEach(student => {
+        const row = [
+            student.folio,
+            student.matricula,
+            `"${student.nombre}"`, // Quotes for names with commas
+            `"${student.carrera}"`, // Quotes for career names
+            student.adeudo.toFixed(2),
+            student.estado === 'sin_adeudo' ? 'Sin Adeudo' : 'Con Adeudo',
+            student.fecha_registro,
+            student.hora_registro || ''
+        ];
+        csvContent += row.join(',') + '\n';
+    });
+    
+    // Add summary at the end
+    const totalStudents = students.length;
+    const totalAmount = students.reduce((sum, s) => sum + s.adeudo, 0);
+    const withDebt = students.filter(s => s.estado === 'con_adeudo').length;
+    const withoutDebt = students.filter(s => s.estado === 'sin_adeudo').length;
+    
+    csvContent += '\n';
+    csvContent += `RESUMEN\n`;
+    csvContent += `Total de Estudiantes,${totalStudents}\n`;
+    csvContent += `Con Adeudo,${withDebt}\n`;
+    csvContent += `Sin Adeudo,${withoutDebt}\n`;
+    csvContent += `Total Recaudado,$${totalAmount.toFixed(2)}\n`;
+    csvContent += `Promedio por Estudiante,$${(totalAmount / totalStudents).toFixed(2)}\n`;
+    
+    // Create download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename.replace(/\s+/g, '_')}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Call initialization when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+    initializeCSVHandlers(); // ADD THIS LINE
+});
