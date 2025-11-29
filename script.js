@@ -182,21 +182,45 @@ function updateActiveMenu(pageName) {
 
 // Manejo de formularios
 function initializeFormHandlers() {
-    const montoInput = document.getElementById('monto-adeudo');
+    const registrarBtn = document.getElementById('registrar-devolucion');
 
+    // Registrar devolución
+    if (registrarBtn) {
+        registrarBtn.addEventListener('click', function() {
+            registrarDevolucion();
+        });
+    }
+    
+    // Add event listeners for live updates (only if elements exist)
+    const matriculaInput = document.getElementById('matricula');
+    const nombreInput = document.getElementById('nombre');
+    const carreraInput = document.getElementById('carrera');
+    const montoInput = document.getElementById('monto-adeudo');
+    const folioInput = document.getElementById('folio-manual');
+    
+    if (matriculaInput) {
+        matriculaInput.addEventListener('input', updateResumen);
+    }
+    
+    if (nombreInput) {
+        nombreInput.addEventListener('input', updateResumen);
+    }
+    
+    if (carreraInput) {
+        carreraInput.addEventListener('change', updateResumen);
+    }
+    
     if (montoInput) {
         montoInput.addEventListener('input', function() {
             updatePaymentTypePreview();
             updateResumen();
         });
     }
-
-    const registrarBtn = document.getElementById('registrar-devolucion');
-
-    // Registrar devolución
-    registrarBtn.addEventListener('click', function() {
-        registrarDevolucion();
-    });}
+    
+    if (folioInput) {
+        folioInput.addEventListener('input', updateResumen);
+    }
+}
 
 function updateCurrentFolio() {
     const folioElement = document.getElementById('current-folio');
@@ -247,33 +271,53 @@ function updateResumen() {
     const folioManual = document.getElementById('folio-manual').value;
 
     // Actualizar elementos del resumen
-    document.getElementById('resumen-estudiante').textContent = nombre || 'N/A';
-    document.getElementById('resumen-carrera').textContent = carrera || 'N/A';
+    const resumenEstudiante = document.getElementById('resumen-estudiante');
+    const resumenCarrera = document.getElementById('resumen-carrera');
+    const resumenAdeudo = document.getElementById('resumen-adeudo');
+    const resumenFolioElement = document.getElementById('resumen-folio');
+    
+    // Check if elements exist before updating
+    if (resumenEstudiante) {
+        resumenEstudiante.textContent = nombre || 'N/A';
+    }
+    
+    if (resumenCarrera) {
+        resumenCarrera.textContent = carrera || 'N/A';
+    }
     
     // Formatear monto del adeudo
     const monto = parseFloat(montoAdeudo) || 0;
-    document.getElementById('resumen-adeudo').textContent = `$${monto.toFixed(2)}`;
-
-    // Mostrar folio (manual o automático)
-    const resumenFolioElement = document.getElementById('resumen-folio');
-    if (folioManual && folioManual.trim()) {
-        const formattedFolio = formatFolio(folioManual.trim());
-        resumenFolioElement.textContent = formattedFolio;
-        
-        // Validar si es único
-        if (!validateFolioUnique(formattedFolio)) {
-            resumenFolioElement.innerHTML = `${formattedFolio} <span style="color: #ef4444; font-size: 12px;">(⚠️ DUPLICADO)</span>`;
-        }
-    } else {
-        resumenFolioElement.textContent = getNextAvailableFolio();
+    if (resumenAdeudo) {
+        resumenAdeudo.textContent = `$${monto.toFixed(2)}`;
     }
 
+    // Mostrar folio (manual o automático)
+    if (resumenFolioElement) {
+        if (folioManual && folioManual.trim()) {
+            const formattedFolio = formatFolio(folioManual.trim());
+            resumenFolioElement.textContent = formattedFolio;
+            
+            // Validar si es único
+            if (!validateFolioUnique(formattedFolio)) {
+                resumenFolioElement.innerHTML = `${formattedFolio} <span style="color: #ef4444; font-size: 12px;">(⚠️ DUPLICADO)</span>`;
+            }
+        } else {
+            resumenFolioElement.textContent = getNextAvailableFolio();
+        }
+    }
+    
     // Update payment type preview
     updatePaymentTypePreview();
 }
 
+
 function updatePaymentTypePreview() {
-    const montoAdeudo = parseFloat(document.getElementById('monto-adeudo').value) || 0;
+    const montoInput = document.getElementById('monto-adeudo');
+    
+    // Check if monto input exists
+    if (!montoInput) return;
+    
+    const montoAdeudo = parseFloat(montoInput.value) || 0;
     
     // Determine payment type based on amount
     const tipoPago = montoAdeudo > 0 ? 'efectivo' : 'multa_cancelada';
