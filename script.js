@@ -780,14 +780,21 @@ function updateStudentsTable() {
         studentsTable.innerHTML = `
             <div class="table-row">
                 <div class="table-cell" style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
-                    No hay registros de pagos
+                    No hay registros de devoluciones
                 </div>
             </div>
         `;
         return;
     }
     
-    studentsTable.innerHTML = estudiantes.map((estudiante, index) => `
+    // FIXED: Reverse the array to show newest first (last folio first)
+    const sortedStudents = [...estudiantes].reverse();
+    
+    studentsTable.innerHTML = sortedStudents.map((estudiante, index) => {
+        // Get the original index for the actions (since we reversed the array)
+        const originalIndex = estudiantes.length - 1 - index;
+        
+        return `
         <div class="table-row">
             <div class="table-cell">
                 <strong>${estudiante.folio}</strong>
@@ -802,26 +809,33 @@ function updateStudentsTable() {
                 ${estudiante.carrera}
             </div>
             <div class="table-cell">
+                <span class="payment-badge ${estudiante.tipoPago === 'efectivo' ? 'payment-efectivo' : 'payment-multa'}">
+                    ${estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada'}
+                </span>
+            </div>
+            <div class="table-cell">
                 <span class="status-badge ${estudiante.estado === 'sin_adeudo' ? 'status-sin-adeudo' : 'status-con-adeudo'}">
                     ${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `$${estudiante.adeudo.toFixed(2)}`}
                 </span>
             </div>
             <div class="table-cell">
                 <div class="action-buttons">
-                    <button class="btn-edit" onclick="editStudent(${index})" title="Editar registro">
+                    <button class="btn-edit" onclick="editStudent(${originalIndex})" title="Editar registro">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-pdf" onclick="previewPDF(${index})" title="Previsualizar comprobante PDF">
+                    <button class="btn-pdf" onclick="previewPDF(${originalIndex})" title="Previsualizar comprobante PDF">
                         <i class="fas fa-file-pdf"></i>
                     </button>
-                    <button class="btn-delete" onclick="deleteStudent(${index})" title="Eliminar registro">
+                    <button class="btn-delete" onclick="deleteStudent(${originalIndex})" title="Eliminar registro">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
+
 
 // Función para generar PDF del comprobante
 function generatePDF(estudianteIndex) {
@@ -1132,7 +1146,7 @@ function generatePDFContent(doc, estudiante) {
     
     // Datos del estudiante
     let yPosition = 90;
-    const lineHeight = 15;
+    const lineHeight = 18;  // INCREASED from 15 to 18 for more spacing
     
     doc.setFontSize(12);
     doc.setTextColor(44, 62, 80);
@@ -1143,14 +1157,14 @@ function generatePDFContent(doc, estudiante) {
         doc.text(`${label}:`, 25, y);
         doc.setFont("helvetica", "normal");
         doc.text(value, 25, y + 8);
-        return y + lineHeight + 5;
+        return y + lineHeight;
     };
     
     yPosition = addField('Matrícula', estudiante.matricula, yPosition);
     yPosition = addField('Estudiante', estudiante.nombre, yPosition);
     yPosition = addField('Carrera', estudiante.carrera, yPosition);
     
-    // Hora de registro en lugar de fecha de devolución
+    // Hora de registro
     const horaRegistro = estudiante.horaRegistro || new Date().toLocaleTimeString('es-ES', { 
         timeZone: 'America/Mexico_City',
         hour: '2-digit', 
@@ -1160,23 +1174,28 @@ function generatePDFContent(doc, estudiante) {
 
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
     
+    // FIXED: Add extra spacing before adeudo section
+    yPosition += 15;  // Extra spacing
+    
     // Adeudo (destacado)
-    yPosition += 10;
     if (estudiante.adeudo > 0) {
         doc.setFontSize(14);
         doc.setTextColor(231, 76, 60);
         doc.setFont("helvetica", "bold");
-        doc.text('MONTO DEL ADEUDO:', 25, yPosition);
+        doc.text('MONTO DE LA CUOTA:', 25, yPosition);
         doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 10);
     } else {
         doc.setFontSize(14);
         doc.setTextColor(39, 174, 96);
         doc.setFont("helvetica", "bold");
-        doc.text('DEVOLUCIÓN SIN ADEUDO', 25, yPosition);
+        doc.text('PAGO SIN ADEUDO', 25, yPosition);
         doc.text('$0.00 pesos', 25, yPosition + 10);
     }
     
-    yPosition += 10;
+    // FIXED: Add proper spacing before tipo de pago
+    yPosition += 25;  // Increased spacing from 10 to 25
+    
+    // Tipo de pago
     doc.setFontSize(12);
     doc.setTextColor(44, 62, 80);
     doc.setFont("helvetica", "bold");
@@ -1184,14 +1203,17 @@ function generatePDFContent(doc, estudiante) {
     doc.setFont("helvetica", "normal");
     const tipoPagoText = estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
     doc.text(tipoPagoText, 25, yPosition + 8);
-
+    
+    // FIXED: Add spacing before información del recibo
+    yPosition += 25;  // Increased spacing
+    
     // Información del recibo
-    yPosition += 30;
     doc.setFontSize(12);
     doc.setTextColor(44, 62, 80);
     doc.setFont("helvetica", "normal");
     
     yPosition = addField('Número de recibo', estudiante.folio.replace('No.', ''), yPosition);
+    
     const fechaEmision = new Intl.DateTimeFormat('es-ES', {
         timeZone: 'America/Mexico_City',
         year: 'numeric',
@@ -1200,6 +1222,7 @@ function generatePDFContent(doc, estudiante) {
     }).format(new Date());
 
     yPosition = addField('Fecha de emisión', fechaEmision, yPosition);
+    
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(127, 140, 141);
@@ -1209,6 +1232,7 @@ function generatePDFContent(doc, estudiante) {
     doc.setDrawColor(149, 165, 166);
     doc.line(20, 270, 190, 270);
 }
+
 
 // Función helper para formatear fechas en el PDF
 function formatDateForPDF(dateString) {
