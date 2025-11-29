@@ -56,6 +56,7 @@ class StudentsAPI {
                 'nombre' => $student['nombre'],
                 'carrera' => $student['carrera'],
                 'adeudo' => floatval($student['adeudo']),
+                'tipoPago' => $student['tipo_pago'],
                 'estado' => $student['estado'],
                 'fechaRegistro' => $student['fecha_registro'],
                 'horaRegistro' => $student['hora_registro']
@@ -74,40 +75,44 @@ class StudentsAPI {
         if (!$input) {
             sendErrorResponse("Invalid JSON data");
         }
-        
+
         // Validate input
         $errors = Validator::validateStudent($input);
         if (!empty($errors)) {
             sendErrorResponse(implode(', ', $errors));
         }
-        
+
         // Sanitize input
         $matricula = Validator::sanitizeString($input['matricula']);
         $nombre = Validator::sanitizeString($input['nombre']);
         $carrera = Validator::sanitizeString($input['carrera']);
         $adeudo = Validator::sanitizeNumber($input['adeudo']);
+
+        // Auto-assign tipo_pago based on adeudo amount
+        $tipoPago = $adeudo > 0 ? 'efectivo' : 'multa_cancelada';
         $estado = $adeudo > 0 ? 'con_adeudo' : 'sin_adeudo';
-        
+
         // Handle folio generation
         $folio = $this->generateFolio($input['folio'] ?? null);
-        
-        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, adeudo, estado, hora_registro) 
-                 VALUES (:folio, :matricula, :nombre, :carrera, :adeudo, :estado, :hora_registro)";
-        
+
+        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, adeudo, tipo_pago, estado, hora_registro) 
+                 VALUES (:folio, :matricula, :nombre, :carrera, :adeudo, :tipo_pago, :estado, :hora_registro)";
+
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':folio', $folio);
         $stmt->bindParam(':matricula', $matricula);
         $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':carrera', $carrera);
         $stmt->bindParam(':adeudo', $adeudo);
+        $stmt->bindParam(':tipo_pago', $tipoPago);
         $stmt->bindParam(':estado', $estado);
-        
+
         $hora_registro = date('H:i:s');
         $stmt->bindParam(':hora_registro', $hora_registro);
-        
+
         if ($stmt->execute()) {
             $studentId = $this->connection->lastInsertId();
-            
+
             // Return created student
             $createdStudent = [
                 'id' => $studentId,
@@ -116,11 +121,12 @@ class StudentsAPI {
                 'nombre' => $nombre,
                 'carrera' => $carrera,
                 'adeudo' => floatval($adeudo),
+                'tipoPago' => $tipoPago,
                 'estado' => $estado,
                 'fechaRegistro' => date('Y-m-d H:i:s'),
                 'horaRegistro' => $hora_registro
             ];
-            
+
             sendJSONResponse([
                 'success' => true,
                 'message' => 'Estudiante registrado exitosamente',
@@ -143,7 +149,7 @@ class StudentsAPI {
             sendErrorResponse(implode(', ', $errors));
         }
         
-        // Check if folio is unique (excluding current record) - remove activo check
+        // Check if folio is unique (excluding current record)
         if (isset($input['folio'])) {
             $folioCheck = "SELECT id FROM estudiantes WHERE folio = :folio AND id != :id";
             $stmt = $this->connection->prepare($folioCheck);
@@ -160,12 +166,14 @@ class StudentsAPI {
         $nombre = Validator::sanitizeString($input['nombre']);
         $carrera = Validator::sanitizeString($input['carrera']);
         $adeudo = Validator::sanitizeNumber($input['adeudo']);
+        
+        // Auto-assign tipo_pago based on adeudo amount
+        $tipoPago = $adeudo > 0 ? 'efectivo' : 'multa_cancelada';
         $estado = $adeudo > 0 ? 'con_adeudo' : 'sin_adeudo';
         $folio = $input['folio'];
         
-        // Remove activo filter from update query
         $query = "UPDATE estudiantes SET folio = :folio, matricula = :matricula, nombre = :nombre, 
-                 carrera = :carrera, adeudo = :adeudo, estado = :estado 
+                 carrera = :carrera, adeudo = :adeudo, tipo_pago = :tipo_pago, estado = :estado 
                  WHERE id = :id";
         
         $stmt = $this->connection->prepare($query);
@@ -175,6 +183,7 @@ class StudentsAPI {
         $stmt->bindParam(':nombre', $nombre);
         $stmt->bindParam(':carrera', $carrera);
         $stmt->bindParam(':adeudo', $adeudo);
+        $stmt->bindParam(':tipo_pago', $tipoPago);
         $stmt->bindParam(':estado', $estado);
         
         if ($stmt->execute()) {

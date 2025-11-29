@@ -249,7 +249,17 @@
                         <div class="monto-info">
                             <div class="info-box">
                                 <i class="fas fa-info-circle"></i>
-                                <p><strong>Importante:</strong> Ingrese el monto exacto de la cuota a pagar (o $0 si no hay adeudo).</p>
+                                <div>
+                                    <p><strong>Importante:</strong> Ingrese el monto exacto de la cuota a pagar.</p>
+                                    <p style="margin-top: 8px;">
+                                        <strong>Tipo de pago:</strong> 
+                                        <span id="preview-tipo-pago" class="payment-preview efectivo">Efectivo</span>
+                                    </p>
+                                    <small style="display: block; margin-top: 4px; color: #6b7280;">
+                                        • Si el monto es mayor a $0 → <strong>Efectivo</strong><br>
+                                        • Si el monto es $0 → <strong>Multa Cancelada</strong>
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -262,7 +272,8 @@
 
                     <div class="resumen-grid">
                         <div class="resumen-item">
-                            <strong>Folio:</strong> <span id="resumen-folio">Se generará automáticamente</span>
+                            <strong>Tipo de pago:</strong> 
+                            <span id="resumen-tipo-pago" class="payment-preview efectivo">Efectivo</span>
                         </div>
                         <div class="resumen-item">
                             <strong>Estudiante:</strong> <span id="resumen-estudiante">N/A</span>

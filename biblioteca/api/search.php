@@ -61,6 +61,7 @@ class SearchAPI {
                 'nombre' => $student['nombre'],
                 'carrera' => $student['carrera'],
                 'adeudo' => floatval($student['adeudo']),
+                'tipoPago' => $student['tipo_pago'],
                 'estado' => $student['estado'],
                 'fechaRegistro' => $student['fecha_registro'],
                 'horaRegistro' => $student['hora_registro']

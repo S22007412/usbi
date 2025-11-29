@@ -96,6 +96,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     initializeReportsHandlers();
     loadCarrerasForReports();
+
+    initializeCSVHandlers();
+    updatePaymentTypePreview();
 });
 
 // Navegación entre páginas
@@ -176,6 +179,15 @@ function updateActiveMenu(pageName) {
 
 // Manejo de formularios
 function initializeFormHandlers() {
+    const montoInput = document.getElementById('monto-adeudo');
+
+    if (montoInput) {
+        montoInput.addEventListener('input', function() {
+            updatePaymentTypePreview();
+            updateResumen();
+        });
+    }
+
     const registrarBtn = document.getElementById('registrar-devolucion');
 
     // Registrar devolución
@@ -251,6 +263,31 @@ function updateResumen() {
         }
     } else {
         resumenFolioElement.textContent = getNextAvailableFolio();
+    }
+
+    // Update payment type preview
+    updatePaymentTypePreview();
+}
+
+function updatePaymentTypePreview() {
+    const montoAdeudo = parseFloat(document.getElementById('monto-adeudo').value) || 0;
+    
+    // Determine payment type based on amount
+    const tipoPago = montoAdeudo > 0 ? 'efectivo' : 'multa_cancelada';
+    const tipoPagoText = tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
+    
+    // Update preview in Monto section
+    const previewElement = document.getElementById('preview-tipo-pago');
+    if (previewElement) {
+        previewElement.textContent = tipoPagoText;
+        previewElement.className = `payment-preview ${tipoPago}`;
+    }
+    
+    // Update resumen
+    const resumenElement = document.getElementById('resumen-tipo-pago');
+    if (resumenElement) {
+        resumenElement.textContent = tipoPagoText;
+        resumenElement.className = `payment-preview ${tipoPago}`;
     }
 }
 
@@ -401,6 +438,14 @@ function displaySearchResults(results, searchTerm) {
                     <div class="info-item">
                         <div class="info-label">Carrera</div>
                         <div class="info-value">${estudiante.carrera}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Tipo de Pago</div>
+                        <div class="info-value">
+                            <span class="payment-badge ${estudiante.tipoPago === 'efectivo' ? 'payment-efectivo' : 'payment-multa'}">
+                                ${estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada'}
+                            </span>
+                        </div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Estado</div>
@@ -781,6 +826,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    
 });
 
 // Exportar funciones para uso global
@@ -1082,6 +1129,15 @@ function generatePDFContent(doc, estudiante) {
         doc.text('$0.00 pesos', 25, yPosition + 10);
     }
     
+    yPosition += 10;
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "bold");
+    doc.text('Tipo de Pago:', 25, yPosition);
+    doc.setFont("helvetica", "normal");
+    const tipoPagoText = estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
+    doc.text(tipoPagoText, 25, yPosition + 8);
+
     // Información del recibo
     yPosition += 30;
     doc.setFontSize(12);
@@ -1478,8 +1534,8 @@ async function generateCareerCSV() {
 // Download CSV helper function
 function downloadCSV(students, filename, type) {
     // CSV Headers
-    const headers = ['Folio', 'Matrícula', 'Nombre', 'Carrera', 'Cuota', 'Estado', 'Fecha', 'Hora'];
-    
+    const headers = ['Folio', 'Matrícula', 'Nombre', 'Carrera', 'Cuota', 'Tipo de Pago', 'Estado', 'Fecha', 'Hora'];
+
     // Build CSV content
     let csvContent = headers.join(',') + '\n';
     
@@ -1490,6 +1546,7 @@ function downloadCSV(students, filename, type) {
             `"${student.nombre}"`, // Quotes for names with commas
             `"${student.carrera}"`, // Quotes for career names
             student.adeudo.toFixed(2),
+            student.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada',
             student.estado === 'sin_adeudo' ? 'Sin Adeudo' : 'Con Adeudo',
             student.fecha_registro,
             student.hora_registro || ''
@@ -1524,9 +1581,3 @@ function downloadCSV(students, filename, type) {
     link.click();
     document.body.removeChild(link);
 }
-
-// Call initialization when DOM loads
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
-    initializeCSVHandlers(); // ADD THIS LINE
-});

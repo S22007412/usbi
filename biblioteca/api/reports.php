@@ -99,6 +99,7 @@ class ReportsAPI {
                         'nombre' => $student['nombre'],
                         'carrera' => $student['carrera'],
                         'adeudo' => floatval($student['adeudo']),
+                        'tipoPago' => $student['tipo_pago'],
                         'estado' => $student['estado'],
                         'fecha_registro' => $student['fecha_registro'],
                         'hora_registro' => $student['hora_registro']
@@ -167,6 +168,7 @@ class ReportsAPI {
                         'nombre' => $student['nombre'],
                         'carrera' => $student['carrera'],
                         'adeudo' => floatval($student['adeudo']),
+                        'tipoPago' => $student['tipo_pago'],
                         'estado' => $student['estado'],
                         'fecha_registro' => $student['fecha_registro'],
                         'hora_registro' => $student['hora_registro']
