@@ -153,6 +153,9 @@ function navigateToPage(pageName) {
         targetPage.classList.add('active');
         currentPage = pageName;
 
+        // UPDATE: Always update the active menu item
+        updateActiveMenu(pageName);
+
         // Acciones específicas por página
         if (pageName === 'registro') {
             updateCurrentFolio();
