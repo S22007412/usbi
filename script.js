@@ -787,12 +787,16 @@ function updateStudentsTable() {
         return;
     }
     
-    // FIXED: Reverse the array to show newest first (last folio first)
-    const sortedStudents = [...estudiantes].reverse();
+    // FIXED: Sort by folio number descending (highest folio first - newest on top)
+    const sortedStudents = [...estudiantes].sort((a, b) => {
+        const folioA = parseInt(a.folio.replace('No.', ''));
+        const folioB = parseInt(b.folio.replace('No.', ''));
+        return folioB - folioA; // Descending order (newest first)
+    });
     
-    studentsTable.innerHTML = sortedStudents.map((estudiante, index) => {
-        // Get the original index for the actions (since we reversed the array)
-        const originalIndex = estudiantes.length - 1 - index;
+    studentsTable.innerHTML = sortedStudents.map((estudiante) => {
+        // Find the original index in the unsorted array
+        const originalIndex = estudiantes.findIndex(e => e.id === estudiante.id);
         
         return `
         <div class="table-row">
@@ -835,6 +839,7 @@ function updateStudentsTable() {
     `;
     }).join('');
 }
+
 
 
 // Función para generar PDF del comprobante
