@@ -711,17 +711,6 @@ function showErrorMessage(message) {
     // Create error element
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
-    errorDiv.style.cssText = `
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-        padding: 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    `;
     errorDiv.innerHTML = `
         <i class="fas fa-exclamation-circle"></i>
         <span>${message}</span>

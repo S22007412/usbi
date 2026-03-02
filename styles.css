@@ -1278,3 +1278,17 @@ body {
 .table-row {
     grid-template-columns: 100px 1fr 1fr 120px 120px 150px;
 }
+
+/* Moved from script.js*/
+
+.error-message {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
