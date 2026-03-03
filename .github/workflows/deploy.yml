@@ -26,4 +26,4 @@ jobs:
 
     - name: Deploy to VM
       run: |
-        ssh -i ~/.ssh/deploy_key zs22007412@136.117.35.95 "bash /home/zs22007412/deploy/deploy.sh"
+        ssh -i ~/.ssh/deploy_key zs22007412@ubiuv.duckdns.org "bash /home/zs22007412/deploy/deploy.sh"
