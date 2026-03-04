@@ -1,0 +1,280 @@
+/* --- Variables y Reset --- */
+:root {
+    /* Colores Modo Claro (Por defecto) */
+    --bg-color: #f3f4f6;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --card-border: transparent;
+    
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --primary-glow: rgba(59, 130, 246, 0.3);
+    
+    --input-bg: #f9fafb;
+    --input-border: #e5e7eb;
+    --input-icon: #9ca3af;
+    
+    --blob-1: #dbeafe; /* blue-100 */
+    --blob-2: #e2e8f0; /* slate-200 */
+}
+
+/* Redefinición de variables para Modo Oscuro */
+body.dark-mode {
+    --bg-color: #0f172a;
+    --text-main: #f8fafc;
+    --text-sub: #94a3b8;
+    
+    --card-bg: #1e293b;
+    --card-shadow: none;
+    --card-border: 1px solid #334155;
+    
+    --input-bg: #1e293b; /* slate-800 */
+    --input-border: #475569;
+    --input-icon: #64748b;
+
+    --blob-1: rgba(30, 58, 138, 0.4); /* blue-900 con opacidad */
+    --blob-2: rgba(30, 41, 59, 0.4); /* slate-800 con opacidad */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+    overflow: hidden; /* Para evitar scroll por los blobs */
+}
+
+/* --- Layout Principal --- */
+.main-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 1rem;
+    position: relative;
+    z-index: 10;
+}
+
+.login-wrapper {
+    width: 100%;
+}
+
+/* --- Encabezado --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background-color: var(--primary);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 15px -3px var(--primary-glow);
+}
+
+.logo-icon {
+    font-size: 36px !important;
+}
+
+.header-section h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.subtitle {
+    color: var(--text-sub);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* --- Tarjeta --- */
+.login-card {
+    background-color: var(--card-bg);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.card-header {
+    margin-bottom: 2rem;
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.card-header p {
+    color: var(--text-sub);
+    font-size: 0.875rem;
+}
+
+/* --- Formulario --- */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--input-icon);
+    font-size: 20px !important;
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.625rem 0.75rem 0.625rem 2.5rem; /* Left padding space for icon */
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.input-wrapper input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.card-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.card-footer p {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+}
+
+/* --- Fondos Difuminados (Blobs) --- */
+.background-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    transition: background-color 0.3s;
+}
+
+.blob-1 {
+    top: -10%;
+    right: -5%;
+    width: 500px;
+    height: 500px;
+    background-color: var(--blob-1);
+}
+
+.blob-2 {
+    bottom: -10%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background-color: var(--blob-2);
+}
+
+/* --- Toggle Button --- */
+#theme-toggle {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--card-bg);
+    border: 1px solid var(--input-border);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    transition: color 0.3s, background-color 0.3s;
+    z-index: 50;
+}
+
+#theme-toggle:hover {
+    color: var(--primary);
+}
+
+/* Lógica para mostrar/ocultar iconos del toggle */
+.icon-sun, .icon-moon {
+    font-size: 24px !important;
+}
+
+/* Por defecto (Modo Claro): Ocultar luna, mostrar sol (o viceversa según preferencia) */
+/* En este diseño: Sol visible en dark mode, Luna visible en light mode */
+.icon-sun { display: none; }
+.icon-moon { display: block; }
+
+body.dark-mode .icon-sun { display: block; }
+body.dark-mode .icon-moon { display: none; }
