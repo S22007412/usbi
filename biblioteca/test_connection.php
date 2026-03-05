@@ -24,6 +24,10 @@ try {
     $stmt = $connection->prepare("SHOW TABLES LIKE 'carreras'");
     $stmt->execute();
     $carrerasExists = $stmt->fetch() !== false;
+
+    $stmt = $connection->prepare("SHOW TABLES LIKE 'login'");
+    $stmt->execute();
+    $loginExists = $stmt->fetch() !== false;
     
     // Get some sample data
     $stmt = $connection->prepare("SELECT COUNT(*) as count FROM estudiantes");
