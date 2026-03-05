@@ -47,6 +47,7 @@ try {
             'estudiantes' => $estudiantesExists ? "✓ Exists ({$estudiantesCount} records)" : "✗ Missing",
             'configuracion' => $configExists ? "✓ Exists" : "✗ Missing",
             'carreras' => $carrerasExists ? "✓ Exists ({$carrerasCount} records)" : "✗ Missing"
+            'login' => $loginExists ? "✓ Exists ({$loginCount} records)" : "✗ Missing"
         ],
         'timestamp' => date('Y-m-d H:i:s')
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
