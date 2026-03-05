@@ -37,6 +37,10 @@ try {
     $stmt = $connection->prepare("SELECT COUNT(*) as count FROM carreras");
     $stmt->execute();
     $carrerasCount = $stmt->fetch()['count'];
+
+    $stmt = $connection->prepare("SELECT COUNT(*) as count FROM login");
+    $stmt->execute();
+    $loginCount = $stmt->fetch()['count'];
     
     echo json_encode([
         'success' => true,
