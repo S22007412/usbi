@@ -1122,10 +1122,7 @@ function generatePDFContent(doc, estudiante) {
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
 
-    // LOGO UNIVERSIDAD VERACRUZANA
-    const logo = new Image();
-    logo.src = "imgenes/logo_uv.png";
-    doc.addImage(logo, "PNG", 20, 10, 30, 30);
+    
     
     // Header
     doc.setFontSize(20);
