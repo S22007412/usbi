@@ -1,4 +1,10 @@
 <?php
+// Error reporting
+ini_set('display_errors', 1); // Enable error display
+ini_set('display_startup_errors', 1); // Show startup errors
+error_reporting(E_ALL); // Report all types of errors
+
+// Database Connection
 require_once '../config/database.php';
 require_once '../includes/cors.php';
 
