@@ -16,7 +16,7 @@ if (!isset($_POST['username'], $_POST['password'])) {
     exit('Please fill both the username and password fields!');
 }
 
-if ($stmt = $con->prepare('SELECT id, contrasena FROM login WHERE usuario = ?')) {
+if ($stmt = $connection->prepare('SELECT id, contrasena FROM login WHERE usuario = ?')) {
     // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
     $stmt->bind_param('s', $_POST['username']);
     $stmt->execute();
