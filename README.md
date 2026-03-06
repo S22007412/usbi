@@ -6,7 +6,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ## Lista de Tareas:
 
-- [ ] Certificado HTTPS
+- [x] Certificado HTTPS
   - [x] Obtención de un certificado con Let's Encrypt
   - [ ] Modificar referencias al URL anterior
   - [ ] Configuración de Apache para la redirección
