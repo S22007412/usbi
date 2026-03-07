@@ -1119,11 +1119,17 @@ function downloadCurrentPDF() {
 
 // Función para generar contenido del PDF (reutilizable)
 function generatePDFContent(doc, estudiante) {
+
+     // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 30, 30);
+
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
+    
 
-    
-    
     // Header
     doc.setFontSize(20);
     doc.setTextColor(44, 62, 80);
