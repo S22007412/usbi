@@ -68,11 +68,74 @@
     </button>
 
     <script>
+        // Theme toggle
         const toggleBtn = document.getElementById('theme-toggle');
         const body = document.body;
 
         toggleBtn.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
+        });
+
+        // Login form handling
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = loginBtn.querySelector('.btn-text');
+        const btnLoading = loginBtn.querySelector('.btn-loading');
+        const errorMsg = document.getElementById('error-message');
+        const successMsg = document.getElementById('success-message');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Clear previous messages
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-flex';
+            
+            // Get form data
+            const formData = new FormData(loginForm);
+            
+            try {
+                const response = await fetch('/biblioteca/api/login.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    successMsg.textContent = data.message;
+                    successMsg.style.display = 'block';
+                    
+                    // Redirect after 1 second
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/index.html';
+                    }, 1000);
+                } else {
+                    // Show error message
+                    errorMsg.textContent = data.message;
+                    errorMsg.style.display = 'block';
+                    
+                    // Reset button
+                    loginBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = 'Error de conexión. Por favor intente nuevamente.';
+                errorMsg.style.display = 'block';
+                
+                // Reset button
+                loginBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
         });
     </script>
 </body>
