@@ -68,12 +68,6 @@ class LoginAPI {
                 $_SESSION['username'] = $user['usuario'];
                 $_SESSION['nombre_completo'] = $user['nombre_completo'];
                 
-                // Update last access time
-                $updateQuery = "UPDATE login SET ultimo_acceso = NOW() WHERE id = :id";
-                $updateStmt = $this->connection->prepare($updateQuery);
-                $updateStmt->bindParam(':id', $user['id']);
-                $updateStmt->execute();
-                
                 // Success response
                 echo json_encode([
                     'success' => true,
