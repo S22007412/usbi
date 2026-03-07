@@ -1,56 +1,103 @@
 <?php
+// Start session
+session_start();
+
 // Error reporting
-ini_set('display_errors', 1); // Enable error display
-ini_set('display_startup_errors', 1); // Show startup errors
-error_reporting(E_ALL); // Report all types of errors
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // Database Connection
 require_once '../config/database.php';
 require_once '../includes/cors.php';
 
-$username = $password = "";
+setCORSHeaders();
 
+class LoginAPI {
+    private $db;
+    private $connection;
 
-if (!isset($_POST['username'], $_POST['password'])) {
-    // Could not get the data that should have been sent
-    exit('Please fill both the username and password fields!');
-}
-
-if ($stmt = $connection->prepare('SELECT id, contrasena FROM login WHERE usuario = ?')) {
-    // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
-    $stmt->bind_param('s', $_POST['username']);
-    $stmt->execute();
-    // Store the result so we can check if the account exists in the database
-    // Check if account exists with the input username
-    if ($stmt->num_rows > 0) {
-        // Account exists, so bind the results to variables
-        $stmt->bind_result($id, $password);
-        $stmt->fetch();
-        // Note: remember to use password_hash in your registration file to store the hashed passwords
-        if (password_verify($_POST['password'], $password)) {
-            // Password is correct! User has logged in!
-            // Regenerate the session ID to prevent session fixation attacks
-            session_regenerate_id();
-            // Declare session variables (they basically act like cookies but the data is remembered on the server)
-            $_SESSION['account_loggedin'] = TRUE;
-            $_SESSION['account_name'] = $_POST['username'];
-            $_SESSION['account_id'] = $id;
-            // Output success message
-            echo 'Welcome back, ' . htmlspecialchars($_SESSION['account_name'], ENT_QUOTES) . '!';
-            exit;
-        } else {
-            // Incorrect password
-            echo 'Incorrect username and/or password!';
-        }
-    } else {
-        // Incorrect username
-        echo 'Incorrect username and/or password!';
+    public function __construct() {
+        $this->db = new Database();
+        $this->connection = $this->db->getConnection();
     }
-    $stmt->store_result();
-
-    // ADD THE REMAINING CODE HERE
-    // Close the prepared statement
-    $stmt->close();
+    
+    public function handleRequest() {
+        // Check if POST data exists
+        if (!isset($_POST['username']) || !isset($_POST['password'])) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Por favor complete todos los campos'
+            ]);
+            exit;
+        }
+        
+        $username = trim($_POST['username']);
+        $password = $_POST['password'];
+        
+        // Validate not empty
+        if (empty($username) || empty($password)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Por favor complete todos los campos'
+            ]);
+            exit;
+        }
+        
+        try {
+            // Simple query with plaintext password comparison
+            $query = "SELECT id, usuario, nombre_completo
+                     FROM login 
+                     WHERE usuario = :username 
+                     AND contrasena = :password 
+                     LIMIT 1";
+            
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(':username', $username);
+            $stmt->bindParam(':password', $password);
+            $stmt->execute();
+            
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($user) {
+                // Login successful!
+                session_regenerate_id();
+                
+                // Set session variables
+                $_SESSION['loggedin'] = true;
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['usuario'];
+                $_SESSION['nombre_completo'] = $user['nombre_completo'];
+                
+                // Update last access time
+                $updateQuery = "UPDATE login SET ultimo_acceso = NOW() WHERE id = :id";
+                $updateStmt = $this->connection->prepare($updateQuery);
+                $updateStmt->bindParam(':id', $user['id']);
+                $updateStmt->execute();
+                
+                // Success response
+                echo json_encode([
+                    'success' => true,
+                    'message' => '¡Bienvenido, ' . htmlspecialchars($user['nombre_completo']) . '!',
+                    'redirect' => '/index.html'
+                ]);
+            } else {
+                // Login failed
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Usuario o contraseña incorrectos'
+                ]);
+            }
+            
+        } catch(Exception $e) {
+            error_log("Login Error: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error en el servidor: ' . $e->getMessage()
+            ]);
+        }
+    }
 }
 
+$api = new LoginAPI();
+$api->handleRequest();
 ?>
