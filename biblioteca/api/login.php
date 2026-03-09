@@ -75,7 +75,7 @@ class LoginAPI {
                     'redirect' => '/index.html'
                 ]);
 
-                window.location.href = "/index.html";
+                redirect('/login.html');
             } else {
                 // Login failed
                 echo json_encode([
