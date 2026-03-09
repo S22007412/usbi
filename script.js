@@ -1143,14 +1143,10 @@ function generatePDFContent(doc, estudiante) {
     doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
     
     // Línea separadora
-    // Línea azul
-    doc.setDrawColor(0, 102, 204);
-    doc.line(20, 70, 190, 70);
 
-    // Línea verde (ligeramente abajo)
-    doc.setDrawColor(0, 153, 76);
-    doc.line(20, 72, 190, 72);
-    
+    doc.setDrawColor(149, 165, 166);
+    doc.line(20, 70, 190, 70);
+  
     // Datos del estudiante
     let yPosition = 90;
     const lineHeight = 18;  // INCREASED from 15 to 18 for more spacing
