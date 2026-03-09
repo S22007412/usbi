@@ -1128,10 +1128,10 @@ function generatePDFContent(doc, estudiante) {
 
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
-    
+
 
     // hoja membretada 
-    const watermark = "img/logo_uv.png";
+    const watermark = "/assets/img/logo_uv.png";
 
     // Configurar transparencia
     doc.setGState(new doc.GState({ opacity: 0.08 }));
