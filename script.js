@@ -1462,9 +1462,6 @@ function generateCareerPDF(data) {
     const doc = new jsPDF();
 
     // LOGO UNIVERSIDAD VERACRUZANA
-    const logo = new Image();
-    logo.src = "img/logo_uv.png";
-
     doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
