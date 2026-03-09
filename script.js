@@ -1130,21 +1130,6 @@ function generatePDFContent(doc, estudiante) {
     doc.setFont("helvetica");
 
 
-    // hoja membretada 
-    const watermark = "/assets/img/logo_uv.png";
-
-    // Configurar transparencia
-    doc.setGState(new doc.GState({ opacity: 0.08 }));
-
-    // Agregar logo en el centro de la hoja
-    doc.addImage(watermark, "PNG", 35, 80, 140, 140);
-
-    // Restaurar opacidad normal
-    doc.setGState(new doc.GState({ opacity: 1 }));
-    
-
-
-
     // Header
     doc.setFontSize(20);
     doc.setTextColor(44, 62, 80);
@@ -1158,8 +1143,19 @@ function generatePDFContent(doc, estudiante) {
     doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
     
     // Línea separadora
-    doc.setDrawColor(149, 165, 166);
+    //doc.setDrawColor(149, 165, 166);
+    //doc.line(20, 70, 190, 70);
+
+
+    // Línea separadora doble
+
+    // Línea azul
+    doc.setDrawColor(0, 102, 204);
     doc.line(20, 70, 190, 70);
+
+    // Línea verde (ligeramente abajo)
+    doc.setDrawColor(0, 153, 76);
+    doc.line(20, 72, 190, 72);
     
     // Datos del estudiante
     let yPosition = 90;
