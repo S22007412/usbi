@@ -75,7 +75,7 @@ class LoginAPI {
                     'redirect' => '/index.html'
                 ]);
 
-                window.location.href = "http://stackoverflow.com";
+                window.location.href = "/index.html";
             } else {
                 // Login failed
                 echo json_encode([
