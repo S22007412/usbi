@@ -75,7 +75,8 @@ class LoginAPI {
                     'redirect' => '/index.html'
                 ]);
 
-                redirect('/login.html');
+                header('Location: /index.html'); exit();
+
             } else {
                 // Login failed
                 echo json_encode([
@@ -93,6 +94,7 @@ class LoginAPI {
         }
     }
 }
+
 
 $api = new LoginAPI();
 $api->handleRequest();
