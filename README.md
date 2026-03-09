@@ -6,20 +6,16 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ## Lista de Tareas:
 
-<<<<<<< HEAD
-- [ ] Certificado HTTPS
-=======
 - [x] Certificado HTTPS
->>>>>>> 69ab065df8aa5975d4b1adf5ae27b0d6b34ef198
   - [x] Obtención de un certificado con Let's Encrypt
-  - [ ] Modificar referencias al URL anterior
-  - [ ] Configuración de Apache para la redirección
+  - [x] Modificar referencias al URL anterior
+  - [x] Configuración de Apache para la redirección
 - [ ] Login
   - [x] Página de login
-  - [ ] Conexión a la base de datos
+  - [x] Conexión a la base de datos
   - [ ] (Opcional) Oauth con cuenta de Microsoft
 - [ ] Generación de Reportes
-  - [ ] Añadir el logo de la Universidad Veracruzana en los .pdf
+  - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
   - [ ] Incluir el nombre del ingenierio que registró la cuota
   - [ ] (Opcional) Reportes por Ingeniero
 - [ ] Bugfixes
@@ -30,14 +26,10 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Documentación de los API endpoints
   - [ ] Diagrama de la base de datos
   - [ ] (Opcional) Guía de instalación en un entorno local
+- [ ] Arreglar el README.md 
 - [ ] (Opcional) Extras
   - [ ] Poner bonito el repositorio
   - [ ] Modo oscuro
-<<<<<<< HEAD
- 
-=======
-
-
  
 <p align="center">
   <img src="https://img.icons8.com/color/96/library.png" alt="Logo Biblioteca" width="80"/>
@@ -393,5 +385,4 @@ Escribe en el campo de búsqueda:
 
 <p align="center">
   Desarrollado con ❤️ para la <strong>Biblioteca USBI</strong> — Universidad Veracruzana
-</p>x
->>>>>>> 69ab065df8aa5975d4b1adf5ae27b0d6b34ef198
+</p>
