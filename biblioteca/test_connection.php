@@ -24,6 +24,10 @@ try {
     $stmt = $connection->prepare("SHOW TABLES LIKE 'carreras'");
     $stmt->execute();
     $carrerasExists = $stmt->fetch() !== false;
+
+    $stmt = $connection->prepare("SHOW TABLES LIKE 'login'");
+    $stmt->execute();
+    $loginExists = $stmt->fetch() !== false;
     
     // Get some sample data
     $stmt = $connection->prepare("SELECT COUNT(*) as count FROM estudiantes");
@@ -33,6 +37,10 @@ try {
     $stmt = $connection->prepare("SELECT COUNT(*) as count FROM carreras");
     $stmt->execute();
     $carrerasCount = $stmt->fetch()['count'];
+
+    $stmt = $connection->prepare("SELECT COUNT(*) as count FROM login");
+    $stmt->execute();
+    $loginCount = $stmt->fetch()['count'];
     
     echo json_encode([
         'success' => true,
@@ -42,7 +50,8 @@ try {
         'tables' => [
             'estudiantes' => $estudiantesExists ? "✓ Exists ({$estudiantesCount} records)" : "✗ Missing",
             'configuracion' => $configExists ? "✓ Exists" : "✗ Missing",
-            'carreras' => $carrerasExists ? "✓ Exists ({$carrerasCount} records)" : "✗ Missing"
+            'carreras' => $carrerasExists ? "✓ Exists ({$carrerasCount} records)" : "✗ Missing",
+            'login' => $loginExists ? "✓ Exists ({$loginCount} records)" : "✗ Missing"
         ],
         'timestamp' => date('Y-m-d H:i:s')
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

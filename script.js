@@ -1119,9 +1119,32 @@ function downloadCurrentPDF() {
 
 // Función para generar contenido del PDF (reutilizable)
 function generatePDFContent(doc, estudiante) {
+
+     // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 40, 40);
+
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
     
+
+    // hoja membretada 
+    const watermark = "img/logo_uv.png";
+
+    // Configurar transparencia
+    doc.setGState(new doc.GState({ opacity: 0.08 }));
+
+    // Agregar logo en el centro de la hoja
+    doc.addImage(watermark, "PNG", 35, 80, 140, 140);
+
+    // Restaurar opacidad normal
+    doc.setGState(new doc.GState({ opacity: 1 }));
+    
+
+
+
     // Header
     doc.setFontSize(20);
     doc.setTextColor(44, 62, 80);
@@ -1338,6 +1361,12 @@ async function generateCareerReport() {
 function generateMonthlyPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
     doc.setFontSize(18);
@@ -1431,6 +1460,12 @@ function generateMonthlyPDF(data) {
 function generateCareerPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
     doc.setFontSize(18);
