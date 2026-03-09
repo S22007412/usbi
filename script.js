@@ -1124,7 +1124,7 @@ function generatePDFContent(doc, estudiante) {
     const logo = new Image();
     logo.src = "img/logo_uv.png";
 
-    doc.addImage(logo, "PNG", 20, 10, 30, 30);
+    doc.addImage(logo, "PNG", 20, 10, 40, 40);
 
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
