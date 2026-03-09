@@ -1143,12 +1143,6 @@ function generatePDFContent(doc, estudiante) {
     doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
     
     // Línea separadora
-    //doc.setDrawColor(149, 165, 166);
-    //doc.line(20, 70, 190, 70);
-
-
-    // Línea separadora doble
-
     // Línea azul
     doc.setDrawColor(0, 102, 204);
     doc.line(20, 70, 190, 70);
