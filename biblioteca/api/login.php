@@ -74,6 +74,8 @@ class LoginAPI {
                     'message' => '¡Bienvenido, ' . htmlspecialchars($user['nombre_completo']) . '!',
                     'redirect' => '/index.html'
                 ]);
+
+                echo "<script>location.href='\index.html';</script>";
             } else {
                 // Login failed
                 echo json_encode([
