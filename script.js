@@ -141,6 +141,7 @@ function initializeNavigation() {
     });
 }
 
+
 function navigateToPage(pageName) {
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(page => {
