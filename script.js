@@ -1351,7 +1351,7 @@ function generateMonthlyPDF(data) {
     const logo = new Image();
     logo.src = "img/logo_uv.png";
 
-    doc.addImage(logo, "PNG", 20, 10, 40, 40);
+    doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
     doc.setFontSize(18);
@@ -1450,7 +1450,7 @@ function generateCareerPDF(data) {
     const logo = new Image();
     logo.src = "img/logo_uv.png";
 
-    doc.addImage(logo, "PNG", 20, 10, 40, 40);
+    doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
     doc.setFontSize(18);
