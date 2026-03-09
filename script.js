@@ -1346,6 +1346,12 @@ async function generateCareerReport() {
 function generateMonthlyPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 40, 40);
     
     // Header
     doc.setFontSize(18);
@@ -1439,6 +1445,12 @@ function generateMonthlyPDF(data) {
 function generateCareerPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    // LOGO UNIVERSIDAD VERACRUZANA
+    const logo = new Image();
+    logo.src = "img/logo_uv.png";
+
+    doc.addImage(logo, "PNG", 20, 10, 40, 40);
     
     // Header
     doc.setFontSize(18);
