@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesíon - Sistema de control de biblioteca</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <title>Iniciar Sesión - Sistema de control de biblioteca</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="/login.css">
 </head>
 <body>
     <div class="main-container">
@@ -28,12 +27,17 @@
                     <p>Por favor ingrese sus credenciales para acceder.</p>
                 </div>
                 
-                <form action="#" method="POST" class="login-form">
+                <!-- Error/Success Messages -->
+                <div id="error-message" class="message error-message" style="display: none;"></div>
+                <div id="success-message" class="message success-message" style="display: none;"></div>
+                
+                <!-- FIXED: Changed action to # and added id for JavaScript -->
+                <form id="loginForm" class="login-form">
                     <div class="form-group">
                         <label for="username">Usuario</label>
                         <div class="input-wrapper">
                             <span class="material-symbols-outlined input-icon">person</span>
-                            <input type="text" id="username" name="username" placeholder="Ingrese su usuario">
+                            <input type="text" id="username" name="username" placeholder="Ingrese su usuario" required>
                         </div>
                     </div>
 
@@ -41,12 +45,15 @@
                         <label for="password">Contraseña</label>
                         <div class="input-wrapper">
                             <span class="material-symbols-outlined input-icon">lock</span>
-                            <input type="password" id="password" name="password" placeholder="••••••••">
+                            <input type="password" id="password" name="password" placeholder="••••••••" required>
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                        <button type="submit" class="btn-primary" id="loginBtn">
+                            <span class="btn-text">Iniciar Sesión</span>
+                            <span class="btn-loading" style="display: none;">Cargando...</span>
+                        </button>
                     </div>
                 </form>
 
@@ -68,11 +75,81 @@
     </button>
 
     <script>
+        // Theme toggle
         const toggleBtn = document.getElementById('theme-toggle');
         const body = document.body;
-
+        
         toggleBtn.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
+        });
+
+        // LOGIN FORM HANDLER - THIS WAS MISSING!
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = loginBtn.querySelector('.btn-text');
+        const btnLoading = loginBtn.querySelector('.btn-loading');
+        const errorMsg = document.getElementById('error-message');
+        const successMsg = document.getElementById('success-message');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+            
+            console.log('Form submitted'); // Debug
+            
+            // Clear previous messages
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            
+            // Get form data
+            const formData = new FormData(loginForm);
+            
+            console.log('Sending to: /biblioteca/api/login.php'); // Debug
+            
+            try {
+                const response = await fetch('/biblioteca/api/login.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status); // Debug
+                
+                const data = await response.json();
+                console.log('Response data:', data); // Debug
+                
+                if (data.success) {
+                    // Show success message
+                    successMsg.textContent = data.message;
+                    successMsg.style.display = 'block';
+                    
+                    // Redirect after 1 second
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/index.html';
+                    }, 1000);
+                } else {
+                    // Show error message
+                    errorMsg.textContent = data.message;
+                    errorMsg.style.display = 'block';
+                    
+                    // Reset button
+                    loginBtn.disabled = false;
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = 'Error de conexión. Por favor intente nuevamente.';
+                errorMsg.style.display = 'block';
+                
+                // Reset button
+                loginBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
         });
     </script>
 </body>

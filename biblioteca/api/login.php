@@ -6,6 +6,9 @@ session_start();
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// IMPORTANT: Set JSON header BEFORE any output
+header('Content-Type: application/json');
+
 // Database Connection
 require_once '../config/database.php';
 require_once '../includes/cors.php';
@@ -68,21 +71,20 @@ class LoginAPI {
                 $_SESSION['username'] = $user['usuario'];
                 $_SESSION['nombre_completo'] = $user['nombre_completo'];
                 
-                // Success response
+                // FIXED: Only send JSON, no header() redirect
                 echo json_encode([
                     'success' => true,
                     'message' => '¡Bienvenido, ' . htmlspecialchars($user['nombre_completo']) . '!',
                     'redirect' => '/index.html'
                 ]);
-
-                header('Location: /index.html'); exit();
-
+                exit;
             } else {
                 // Login failed
                 echo json_encode([
                     'success' => false,
                     'message' => 'Usuario o contraseña incorrectos'
                 ]);
+                exit;
             }
             
         } catch(Exception $e) {
@@ -91,10 +93,10 @@ class LoginAPI {
                 'success' => false,
                 'message' => 'Error en el servidor: ' . $e->getMessage()
             ]);
+            exit;
         }
     }
 }
-
 
 $api = new LoginAPI();
 $api->handleRequest();
