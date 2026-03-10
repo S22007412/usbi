@@ -178,9 +178,7 @@ function initializeNavigation() {
     const logoutItem = document.querySelector('.logout-item');
     if (logoutItem) {
         logoutItem.addEventListener('click', function() {
-            if (confirm('¿Está seguro que desea cerrar sesión?')) {
-                window.location.href = '/biblioteca/api/logout.php';
-            }
+            window.location.href = '/biblioteca/api/logout.php';
         });
     }
 }
