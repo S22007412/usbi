@@ -1,4 +1,5 @@
 <?php
+session_start(); 
 require_once '../config/database.php';
 require_once '../includes/cors.php';
 require_once '../includes/validation.php';
@@ -92,11 +93,14 @@ class StudentsAPI {
         $tipoPago = $adeudo > 0 ? 'efectivo' : 'multa_cancelada';
         $estado = $adeudo > 0 ? 'con_adeudo' : 'sin_adeudo';
 
+        // Get logged in user ID
+        $idUsuario = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
         // Handle folio generation
         $folio = $this->generateFolio($input['folio'] ?? null);
 
-        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, adeudo, tipo_pago, estado, hora_registro) 
-                 VALUES (:folio, :matricula, :nombre, :carrera, :adeudo, :tipo_pago, :estado, :hora_registro)";
+        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, adeudo, tipo_pago, estado, hora_registro, id_usuario) 
+                 VALUES (:folio, :matricula, :nombre, :carrera, :adeudo, :tipo_pago, :estado, :hora_registro, :id_usuario)";
 
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':folio', $folio);
@@ -106,6 +110,7 @@ class StudentsAPI {
         $stmt->bindParam(':adeudo', $adeudo);
         $stmt->bindParam(':tipo_pago', $tipoPago);
         $stmt->bindParam(':estado', $estado);
+        $stmt->bindParam(':id_usuario', $idUsuario); // ID of logged user
 
         $hora_registro = date('H:i:s');
         $stmt->bindParam(':hora_registro', $hora_registro);

@@ -4,6 +4,37 @@
 // API Configuration - Update this to your server's URL
 const API_BASE_URL = 'https://ubiuv.duckdns.org/biblioteca/api';
 
+// Check if user is logged in
+let currentUser = null;
+
+async function checkSession() {
+    try {
+        const response = await fetch('/biblioteca/api/get_session.php');
+        const data = await response.json();
+        
+        if (data.success && data.loggedIn) {
+            currentUser = data.user;
+            console.log('Usuario logueado:', currentUser);
+            
+            // Show user info in the interface (optional)
+            updateUserDisplay();
+        } else {
+            // Not logged in, redirect to login
+            window.location.href = '/login.html';
+        }
+    } catch (error) {
+        console.error('Error checking session:', error);
+        // On error, redirect to login to be safe
+        window.location.href = '/login.html';
+    }
+}
+
+function updateUserDisplay() {
+    // You can add user info to the sidebar or header
+    // For now, just log it
+    console.log(`Bienvenido: ${currentUser.nombre_completo} (${currentUser.rol})`);
+}
+
 // Array de estudiantes - now loaded from database
 let estudiantes = [];
 
@@ -86,6 +117,9 @@ async function loadStatistics() {
 
 // Inicialización del sistema
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in
+    checkSession();
+
     initializeNavigation();
     initializeFormHandlers();
     initializeSearchHandlers();
@@ -139,6 +173,16 @@ function initializeNavigation() {
             });
         }
     });
+
+    // Cerrar sesión
+    const logoutItem = document.querySelector('.logout-item');
+    if (logoutItem) {
+        logoutItem.addEventListener('click', function() {
+            if (confirm('¿Está seguro que desea cerrar sesión?')) {
+                window.location.href = '/biblioteca/api/logout.php';
+            }
+        });
+    }
 }
 
 
