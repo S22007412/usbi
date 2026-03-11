@@ -4,7 +4,7 @@ class Database {
     private $port = "3306";
     private $database = "usbi";
     private $username = "usbi";
-    private $password = "contraseña";
+    private $password = "password";
     private $connection;
     
     public function connect() {
