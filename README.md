@@ -4,7 +4,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ---
 
-## Lista de Tareas:
+## Lista de Tareas
 
 - [x] Certificado HTTPS
   - [x] Obtención de un certificado con Let's Encrypt
@@ -13,24 +13,29 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 - [ ] Login
   - [x] Página de login
   - [x] Conexión a la base de datos
-  - [ ] (Opcional) Oauth con cuenta de Microsoft
+  - [ ] ~(Opcional) Oauth con cuenta de Microsoft~
 - [ ] Generación de Reportes
   - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
   - [ ] Incluir el nombre del ingenierio que registró la cuota
   - [ ] (Opcional) Reportes por Ingeniero
+- [ ] Sistema
+  - [ ] Quitar los datos de ejemplo
+  - [ ] Códigos de error
 - [ ] Bugfixes
   - [ ] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
-  - [ ] Documentación de los API endpoints
   - [ ] Diagrama de la base de datos
+  - [ ] Documentación de los API endpoints
   - [ ] (Opcional) Guía de instalación en un entorno local
-- [ ] Arreglar el README.md 
 - [ ] (Opcional) Extras
   - [ ] Poner bonito el repositorio
-  - [ ] Modo oscuro
- 
+  - [ ] Arreglar el README.md
+  - [ ] ~Modo oscuro~
+
+---
+
 <p align="center">
   <img src="https://img.icons8.com/color/96/library.png" alt="Logo Biblioteca" width="80"/>
 </p>
