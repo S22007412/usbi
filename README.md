@@ -21,7 +21,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 - [ ] Sistema
   - [ ] Quitar los datos de ejemplo
   - [ ] Códigos de error
-- [ ] Bugfixes
+- [ ] Bugfix
   - [ ] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
 - [ ] Documentación del sistema
