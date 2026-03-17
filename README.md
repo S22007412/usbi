@@ -10,13 +10,14 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [x] Obtención de un certificado con Let's Encrypt
   - [x] Modificar referencias al URL anterior
   - [x] Configuración de Apache para la redirección
-- [ ] Login
+- [x] Login
   - [x] Página de login
   - [x] Conexión a la base de datos
   - [ ] ~(Opcional) Oauth con cuenta de Microsoft~
 - [ ] Generación de Reportes
   - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
-  - [ ] Incluir el nombre del ingenierio que registró la cuota
+  - [x] Incluir el nombre del ingenierio que registró la cuota
+  - [ ] Acomodar el formato de los reportes .pdf
   - [ ] (Opcional) Reportes por Ingeniero
 - [ ] Sistema
   - [ ] Quitar los datos de ejemplo
@@ -30,6 +31,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Documentación de los API endpoints
   - [ ] (Opcional) Guía de instalación en un entorno local
 - [ ] (Opcional) Extras
+  - [ ] Eliminar ~legacy code~ 
   - [ ] Poner bonito el repositorio
   - [ ] Arreglar el README.md
   - [ ] ~Modo oscuro~
