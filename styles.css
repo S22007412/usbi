@@ -1317,11 +1317,10 @@ body {
 /* Update table grid to include new column */
 .table-header,
 .table-row {
-    grid-template-columns: 100px 1fr 1fr 120px 120px 150px 150px;
+    grid-template-columns: 100px 1fr 1fr 140px 120px 0.6fr 150px;
 }
 
 /* Moved from script.js*/
-
 .error-message {
     background: #fef2f2;
     border: 1px solid #fecaca;

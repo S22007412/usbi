@@ -1224,7 +1224,7 @@ function generatePDFContent(doc, estudiante) {
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
     
     // FIXED: Add extra spacing before adeudo section
-    yPosition += 15;  // Extra spacing
+    //yPosition += 15;  // Extra spacing
     
     // Adeudo (destacado)
     if (estudiante.adeudo > 0) {
@@ -1242,7 +1242,7 @@ function generatePDFContent(doc, estudiante) {
     }
     
     // FIXED: Add proper spacing before tipo de pago
-    yPosition += 25;  // Increased spacing from 10 to 25
+    yPosition += 10;  // Increased spacing from 10 to 25
     
     // Tipo de pago
     doc.setFontSize(12);
