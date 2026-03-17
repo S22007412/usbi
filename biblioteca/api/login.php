@@ -75,7 +75,7 @@ class LoginAPI {
                 echo json_encode([
                     'success' => true,
                     'message' => '¡Bienvenido, ' . htmlspecialchars($user['username']) . '!',
-                    'redirect' => '/'
+                    'redirect' => '/index.html'
                 ]);
                 exit;
             } else {
