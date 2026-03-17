@@ -98,6 +98,7 @@ class StudentsAPI {
 
         // Get logged in user ID
         $idUsuario = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        $registradoPor = isset($_SESSION['nombre_completo']) ? $_SESSION['nombre_completo'] : 'Sistema';
 
         // Handle folio generation
         $folio = $this->generateFolio($input['folio'] ?? null);
@@ -123,14 +124,14 @@ class StudentsAPI {
 
             // Get the user's name from session or database
             $registradoPor = 'Sistema'; // Default
-                        
+
             if ($idUsuario) {
                 $userQuery = "SELECT nombre_completo FROM login WHERE id = :id LIMIT 1";
                 $userStmt = $this->connection->prepare($userQuery);
                 $userStmt->bindParam(':id', $idUsuario);
                 $userStmt->execute();
                 $userInfo = $userStmt->fetch(PDO::FETCH_ASSOC);
-                        
+
                 if ($userInfo) {
                     $registradoPor = $userInfo['nombre_completo'];
                 }
@@ -147,7 +148,8 @@ class StudentsAPI {
                 'tipoPago' => $tipoPago,
                 'estado' => $estado,
                 'fechaRegistro' => date('Y-m-d H:i:s'),
-                'horaRegistro' => $hora_registro
+                'horaRegistro' => $hora_registro,
+                'registradoPor' => $registradoPor
             ];
 
             sendJSONResponse([
