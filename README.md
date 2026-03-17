@@ -13,30 +13,45 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 - [x] Login
   - [x] Página de login
   - [x] Conexión a la base de datos
-  - [ ] ~(Opcional) Oauth con cuenta de Microsoft~
+  - [x] ~(Opcional) Oauth con cuenta de Microsoft~
 - [ ] Generación de Reportes
   - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
   - [x] Incluir el nombre del ingenierio que registró la cuota
   - [ ] Acomodar el formato de los reportes .pdf
   - [ ] (Opcional) Reportes por Ingeniero
+- [ ] Base de Datos
+  - [ ] Añadir la id_carrera como clave foránea en la lista de registros
+  - [ ] Añadir la tabla login en el sistema de prueba del backend
 - [ ] Sistema
+  - [ ] Arreglar la consistencia del nombre del proyecto en menús 
+  - [ ] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
+  - [ ] Acomodar el css del mensaje de inicio de sesión
+  - [ ] Listar los nombres de carreras de forma dinámica
+    - [ ] Modal para Editar Estudiante
+    - [ ] Página de Registro de Estudiante  
   - [ ] Quitar los datos de ejemplo
+  - [ ] Mejorar los comentarios
   - [ ] Códigos de error
+  - [ ] Revisar la implementación de la zona horaria
+  - [ ] Eliminación de código redundante
+    - [ ] *Frontend sanitizing* vs *backend validation* 
 - [ ] Bugfix
   - [ ] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
-  - [ ] Diagrama de la base de datos
-  - [ ] Documentación de los API endpoints
+  - [ ] Documentación Técnica
+    - [ ] Diagrama de la base de datos
+    - [ ] Documentación de los API endpoints
   - [ ] (Opcional) Guía de instalación en un entorno local
 - [ ] Búsqueda
   - [ ] Añadir el nombre de los ingenieros como filtro de búsqueda
 - [ ] (Opcional) Extras
-  - [ ] Eliminar ~legacy code~
+  - [ ] Eliminar *legacy code*
   - [ ] Poner bonito el repositorio
   - [ ] Arreglar el README.md
-  - [ ] ~Modo oscuro~
+  - [ ] Añadir un indicador del usuario logueado
+  - [x] ~Modo oscuro~
 
 ---
 
