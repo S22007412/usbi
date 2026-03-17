@@ -1065,7 +1065,7 @@ body {
     background: #dc2626;
     color: white;
     border: none;
-    padding: 6px 12px;
+    padding: 12px 12px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
@@ -1078,7 +1078,6 @@ body {
 
 .btn-pdf:hover {
     background: #b91c1c;
-    transform: translateY(-1px);
 }
 
 .btn-pdf i {
