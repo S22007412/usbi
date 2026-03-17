@@ -52,10 +52,12 @@ class ReportsAPI {
             sendErrorResponse("Invalid month or year format");
         }
         
-        $query = "SELECT * FROM estudiantes 
-                 WHERE MONTH(fecha_registro) = :month 
-                 AND YEAR(fecha_registro) = :year 
-                 ORDER BY fecha_registro ASC";
+        $query = "SELECT e.*, l.nombre_completo as registrado_por 
+                  FROM estudiantes e 
+                  LEFT JOIN login l ON e.id_usuario = l.id 
+                  WHERE MONTH(e.fecha_registro) = :month 
+                  AND YEAR(e.fecha_registro) = :year 
+                  ORDER BY e.fecha_registro ASC";
         
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':month', $month, PDO::PARAM_STR);
@@ -102,7 +104,8 @@ class ReportsAPI {
                         'tipoPago' => $student['tipo_pago'],
                         'estado' => $student['estado'],
                         'fecha_registro' => $student['fecha_registro'],
-                        'hora_registro' => $student['hora_registro']
+                        'hora_registro' => $student['hora_registro'],
+                        'registradoPor' => $student['registrado_por'] ?? 'Sistema'
                     ];
                 }, $students)
             ]
@@ -118,9 +121,11 @@ class ReportsAPI {
             sendErrorResponse("Carrera parameter is required");
         }
         
-        $query = "SELECT * FROM estudiantes 
-                 WHERE carrera = :carrera 
-                 ORDER BY fecha_registro ASC";
+        $query = "SELECT e.*, l.nombre_completo as registrado_por 
+                  FROM estudiantes e 
+                  LEFT JOIN login l ON e.id_usuario = l.id 
+                  WHERE e.carrera = :carrera 
+                  ORDER BY e.fecha_registro ASC";
         
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':carrera', $carrera, PDO::PARAM_STR);
@@ -171,7 +176,8 @@ class ReportsAPI {
                         'tipoPago' => $student['tipo_pago'],
                         'estado' => $student['estado'],
                         'fecha_registro' => $student['fecha_registro'],
-                        'hora_registro' => $student['hora_registro']
+                        'hora_registro' => $student['hora_registro'],
+                        'registradoPor' => $student['registrado_por'] ?? 'Sistema'
                     ];
                 }, $students)
             ]

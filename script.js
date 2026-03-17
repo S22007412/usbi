@@ -855,6 +855,11 @@ function updateStudentsTable() {
                 </span>
             </div>
             <div class="table-cell">
+                <small style="color: #64748b;">
+                    ${estudiante.registradoPor || 'Sistema'}
+                </small>
+            </div>
+            <div class="table-cell">
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="editStudent(${originalIndex})" title="Editar registro">
                         <i class="fas fa-edit"></i>
@@ -1266,6 +1271,12 @@ function generatePDFContent(doc, estudiante) {
     }).format(new Date());
 
     yPosition = addField('Fecha de emisión', fechaEmision, yPosition);
+    
+    // Registrado por (Nombre del Ingeniero)
+    yPosition += 5; // Small spacing
+    
+    const registradoPor = estudiante.registradoPor || currentUser?.nombre_completo || 'Sistema';
+    yPosition = addField('Registrado por', registradoPor, yPosition);
     
     // Footer
     doc.setFontSize(10);

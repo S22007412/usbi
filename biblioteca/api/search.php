@@ -38,11 +38,13 @@ class SearchAPI {
         $searchTerm = trim($searchTerm);
         $searchPattern = "%{$searchTerm}%";
         
-        $query = "SELECT * FROM estudiantes 
-                 WHERE (folio LIKE :term1 
-                      OR matricula LIKE :term2 
-                      OR nombre LIKE :term3)
-                 ORDER BY fecha_registro DESC";
+        $query = "SELECT e.*, l.nombre_completo as registrado_por 
+                  FROM estudiantes e 
+                  LEFT JOIN login l ON e.id_usuario = l.id 
+                  WHERE (e.folio LIKE :term1 
+                       OR e.matricula LIKE :term2 
+                       OR e.nombre LIKE :term3)
+                  ORDER BY e.fecha_registro DESC";
         
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':term1', $searchPattern);
@@ -64,7 +66,8 @@ class SearchAPI {
                 'tipoPago' => $student['tipo_pago'],
                 'estado' => $student['estado'],
                 'fechaRegistro' => $student['fecha_registro'],
-                'horaRegistro' => $student['hora_registro']
+                'horaRegistro' => $student['hora_registro'],
+                'registradoPor' => $student['registrado_por'] ?? 'Sistema' 
             ];
         }, $results);
         

@@ -42,8 +42,10 @@ class StudentsAPI {
     }
     
     private function getStudents() {
-        // Remove activo filter since we're now using hard deletes
-        $query = "SELECT * FROM estudiantes ORDER BY fecha_registro DESC";
+        $query = "SELECT e.*, l.nombre_completo as registrado_por 
+                  FROM estudiantes e 
+                  LEFT JOIN login l ON e.id_usuario = l.id 
+                  ORDER BY e.fecha_registro DESC";
         $stmt = $this->connection->prepare($query);
         $stmt->execute();
         $students = $stmt->fetchAll();
@@ -60,7 +62,8 @@ class StudentsAPI {
                 'tipoPago' => $student['tipo_pago'],
                 'estado' => $student['estado'],
                 'fechaRegistro' => $student['fecha_registro'],
-                'horaRegistro' => $student['hora_registro']
+                'horaRegistro' => $student['hora_registro'],
+                'registradoPor' => $student['registrado_por'] ?? 'Sistema' // ADD THIS LINE
             ];
         }, $students);
         
