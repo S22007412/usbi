@@ -1242,7 +1242,7 @@ function generatePDFContent(doc, estudiante) {
     }
     
     // FIXED: Add proper spacing before tipo de pago
-    yPosition += 10;  // Increased spacing from 10 to 25
+    yPosition += 25;  // Increased spacing from 10 to 25
     
     // Tipo de pago
     doc.setFontSize(12);
