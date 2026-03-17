@@ -136,30 +136,30 @@ El sistema sigue una arquitectura **cliente-servidor** con separación clara de 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     🖥️  FRONTEND                            │
-│  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌───────────┐  │
-│  │ index.html│  │ login.html│  │styles.css│  │ script.js │  │
-│  │ (SPA)    │  │           │  │login.css │  │           │  │
-│  └────┬─────┘  └───────────┘  └──────────┘  └─────┬─────┘  │
-│       │              Navegación SPA                │        │
-│       └──────────────── Fetch API ─────────────────┘        │
+│  ┌───────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐   │
+│  │index.html │  │login.html│  │styles.css│  │ script.js │   │
+│  │ (SPA)     │  │          │  │login.css │  │           │   │
+│  └────┬──────┘  └──────────┘  └──────────┘  └─────┬─────┘   │
+│       │              Navegación SPA               │         │
+│       └──────────────── Fetch API ────────────────┘         │
 └───────────────────────────┬─────────────────────────────────┘
                             │ HTTP (JSON)
 ┌───────────────────────────▼─────────────────────────────────┐
 │                     ⚙️  BACKEND (PHP)                       │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │                    /biblioteca/api/                    │ │
-│  │  students.php │ search.php │ stats.php │ reports.php  │ │
-│  │  carreras.php │ config.php                            │ │
+│  │  students.php │ search.php │ stats.php │ reports.php   │ │
+│  │  carreras.php │ config.php                             │ │
 │  └────────────────────────┬───────────────────────────────┘ │
 │  ┌────────────────────────▼───────────────────────────────┐ │
-│  │   /config/database.php   │   /includes/cors.php       │ │
+│  │   /config/database.php   │   /includes/cors.php        │ │
 │  │                          │   /includes/validation.php  │ │
 │  └────────────────────────┬───────────────────────────────┘ │
 └───────────────────────────┬─────────────────────────────────┘
                             │ PDO
 ┌───────────────────────────▼─────────────────────────────────┐
 │                     🗄️  BASE DE DATOS (MySQL)               │
-│  Tablas: estudiantes │ carreras │ configuracion             │
+│  Tablas: estudiantes │ carreras │ login                     │
 │  Vistas: vista_estadisticas │ vista_adeudos_por_mes         │
 │          vista_carreras_adeudos                             │
 └─────────────────────────────────────────────────────────────┘

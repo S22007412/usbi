@@ -49,7 +49,6 @@ try {
         'server' => 'ubiuv.duckdns.org:3306',
         'tables' => [
             'estudiantes' => $estudiantesExists ? "✓ Exists ({$estudiantesCount} records)" : "✗ Missing",
-            'configuracion' => $configExists ? "✓ Exists" : "✗ Missing",
             'carreras' => $carrerasExists ? "✓ Exists ({$carrerasCount} records)" : "✗ Missing",
             'login' => $loginExists ? "✓ Exists ({$loginCount} records)" : "✗ Missing"
         ],
