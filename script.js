@@ -1163,15 +1163,13 @@ function downloadCurrentPDF() {
 // Función para generar contenido del PDF (reutilizable)
 function generatePDFContent(doc, estudiante) {
 
-     // LOGO UNIVERSIDAD VERACRUZANA
+    // Logo de la Universidad Veracruzana
     const logo = new Image();
-    logo.src = "assets/logo_uv.png";
-
+    logo.src = "assets\\logo_uv.png";
     doc.addImage(logo, "PNG", 20, 10, 40, 40);
 
     // Configuración de fuentes y colores
     doc.setFont("helvetica");
-
 
     // Header
     doc.setFontSize(20);
@@ -1391,10 +1389,9 @@ function generateMonthlyPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // LOGO UNIVERSIDAD VERACRUZANA
+    // Logo de la Universidad Veracruzana
     const logo = new Image();
-    logo.src = "assets/logo_uv.png";
-
+    logo.src = "assets\\logo_uv.png";
     doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
@@ -1490,7 +1487,9 @@ function generateCareerPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // LOGO UNIVERSIDAD VERACRUZANA
+    // Logo de la Universidad Veracruzana
+    const logo = new Image();
+    logo.src = "assets\\logo_uv.png";
     doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
     // Header
