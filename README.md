@@ -30,8 +30,10 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Diagrama de la base de datos
   - [ ] Documentación de los API endpoints
   - [ ] (Opcional) Guía de instalación en un entorno local
+- [ ] Búsqueda
+  - [ ] Añadir el nombre de los ingenieros como filtro de búsqueda
 - [ ] (Opcional) Extras
-  - [ ] Eliminar ~legacy code~ 
+  - [ ] Eliminar ~legacy code~
   - [ ] Poner bonito el repositorio
   - [ ] Arreglar el README.md
   - [ ] ~Modo oscuro~
