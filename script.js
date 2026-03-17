@@ -1165,7 +1165,7 @@ function generatePDFContent(doc, estudiante) {
 
      // LOGO UNIVERSIDAD VERACRUZANA
     const logo = new Image();
-    logo.src = "img/logo_uv.png";
+    logo.src = "assets/logo_uv.png";
 
     doc.addImage(logo, "PNG", 20, 10, 40, 40);
 
@@ -1393,7 +1393,7 @@ function generateMonthlyPDF(data) {
 
     // LOGO UNIVERSIDAD VERACRUZANA
     const logo = new Image();
-    logo.src = "img/logo_uv.png";
+    logo.src = "assets/logo_uv.png";
 
     doc.addImage(logo, "PNG", 20, 10, 30, 30);
     
