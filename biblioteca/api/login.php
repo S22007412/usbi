@@ -74,7 +74,7 @@ class LoginAPI {
                 // FIXED: Only send JSON, no header() redirect
                 echo json_encode([
                     'success' => true,
-                    'message' => '¡Bienvenido, ' . htmlspecialchars($user['username']) . '!',
+                    'message' => '¡Bienvenido, ' . htmlspecialchars($user['nombre_completo']) . '!',
                     'redirect' => '/index.html'
                 ]);
                 exit;
