@@ -21,9 +21,12 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] (Opcional) Reportes por Ingeniero
 - [ ] Base de Datos
   - [ ] Añadir la id_carrera como clave foránea en la lista de registros
-  - [ ] Añadir la tabla login en el sistema de prueba del backend
+- [ ] Sistema de prueba del backend
+  - [ ] Eliminar la funcionalidad de la tabla config
+  - [ ] Añadir la tabla login
+  - [ ] Simplificar *dbtest.php*, *debug.php* y *phptest.php*
 - [ ] Sistema
-  - [ ] Arreglar la consistencia del nombre del proyecto en menús 
+  - [ ] Arreglar la consistencia del nombre del proyecto en headers/menús
   - [ ] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
   - [ ] Acomodar el css del mensaje de inicio de sesión
   - [ ] Listar los nombres de carreras de forma dinámica
@@ -34,7 +37,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Códigos de error
   - [ ] Revisar la implementación de la zona horaria
   - [ ] Eliminación de código redundante
-    - [ ] *Frontend sanitizing* vs *backend validation* 
+    - [ ] *Frontend sanitizing* vs *backend validation*
 - [ ] Bugfix
   - [ ] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
@@ -50,6 +53,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Eliminar *legacy code*
   - [ ] Poner bonito el repositorio
   - [ ] Arreglar el README.md
+    - [ ] Reflejar los cambios en la estructura del sistema
   - [ ] Añadir un indicador del usuario logueado
   - [x] ~Modo oscuro~
 
@@ -187,11 +191,11 @@ El sistema sigue una arquitectura **cliente-servidor** con separación clara de 
 ```
 usbi/
 │
-├── 📄 index.html               # Aplicación principal (SPA)
+├── 📄 index.html                # Aplicación principal (SPA)
 ├── 📄 login.html                # Página de inicio de sesión
 ├── 🎨 styles.css                # Estilos del sistema principal
 ├── 🎨 login.css                 # Estilos de la pantalla de login
-├── ⚡ script.js                 # Lógica del frontend (1,648 líneas)
+├── ⚡ script.js                  # Lógica del frontend (1,648 líneas)
 ├── 🗃️ usbi.sql                  # Dump de la base de datos
 ├── 📄 info.php                  # Información del servidor PHP
 ├── 📄 README.md                 # Este archivo
