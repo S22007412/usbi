@@ -27,16 +27,16 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Simplificar *dbtest.php*, *debug.php* y *phptest.php*
 - [ ] Sistema
   - [ ] Arreglar la consistencia del nombre del proyecto en headers/menús
-  - [ ] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
+  - [x] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
   - [ ] Acomodar el css del mensaje de inicio de sesión
-  - [ ] Listar los nombres de carreras de forma dinámica
-    - [ ] Modal para Editar Estudiante
-    - [ ] Página de Registro de Estudiante  
+  - [x] Listar los nombres de carreras de forma dinámica
+    - [x] Modal para Editar Estudiante
+    - [x] Página de Registro de Estudiante  
   - [ ] Quitar los datos de ejemplo
   - [ ] Mejorar los comentarios
   - [ ] Códigos de error
   - [ ] Revisar la implementación de la zona horaria
-  - [ ] Eliminación de código redundante
+  - [ ] Eliminar el código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
 - [ ] Bugfix
   - [x] Arreglar el *cold start loading*

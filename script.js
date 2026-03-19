@@ -773,31 +773,32 @@ function showErrorMessage(message) {
     }
 }
 
-// Mostrar mensajes de éxito
-function showSuccessMessage(message, type = 'success') {
-    // Crear elemento de mensaje
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'success-message';
-    messageDiv.innerHTML = `
-        <i class="fas fa-check-circle"></i>
+// Mostrar mensajes toast de éxito y error 
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${icon}"></i>
         <span>${message}</span>
     `;
 
-    // Insertar en la página actual
-    const activePage = document.querySelector('.page.active');
-    if (activePage) {
-        const pageHeader = activePage.querySelector('.page-header');
-        if (pageHeader) {
-            pageHeader.appendChild(messageDiv);
+    container.appendChild(toast);
 
-            // Remover después de 5 segundos
-            setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.parentNode.removeChild(messageDiv);
-                }
-            }, 5000);
-        }
-    }
+    setTimeout(() => {
+        toast.classList.add('hide');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 4000);
+}
+
+function showSuccessMessage(message) {
+    showToast(message, 'success');
+}
+
+function showErrorMessage(message) {
+    showToast(message, 'error');
 }
 
 // Actualizar tabla de estudiantes
