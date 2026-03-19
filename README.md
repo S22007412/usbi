@@ -14,7 +14,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [x] Página de login
   - [x] Conexión a la base de datos
   - [x] ~(Opcional) Oauth con cuenta de Microsoft~
-- [ ] Generación de Reportes
+- [x] Generación de Reportes
   - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
   - [x] Incluir el nombre del ingenierio que registró la cuota
   - [ ] Acomodar el formato de los reportes .pdf
@@ -39,7 +39,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Eliminación de código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
 - [ ] Bugfix
-  - [ ] Arreglar el *cold start loading*
+  - [x] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
@@ -47,8 +47,8 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
     - [ ] Diagrama de la base de datos
     - [ ] Documentación de los API endpoints
   - [ ] (Opcional) Guía de instalación en un entorno local
-- [ ] Búsqueda
-  - [ ] Añadir el nombre de los ingenieros como filtro de búsqueda
+- [x] Búsqueda
+  - [x] Añadir el nombre de los ingenieros como filtro de búsqueda
 - [ ] (Opcional) Extras
   - [ ] Eliminar *legacy code*
   - [ ] Poner bonito el repositorio

@@ -557,7 +557,7 @@ function clearSearchResults() {
     
     resultsSection.style.display = 'none';
     searchInput.value = '';
-    searchResult.textContent = 'Ej. 0001, S22007409 o Juan Pérez';
+    searchResult.textContent = 'Ej. 0001, S22007409, Juan Pérez o Ingeniero';
 }
 
 // Estadísticas

@@ -39,17 +39,19 @@ class SearchAPI {
         $searchPattern = "%{$searchTerm}%";
         
         $query = "SELECT e.*, l.nombre_completo as registrado_por 
-                  FROM estudiantes e 
-                  LEFT JOIN login l ON e.id_usuario = l.id 
-                  WHERE (e.folio LIKE :term1 
-                       OR e.matricula LIKE :term2 
-                       OR e.nombre LIKE :term3)
-                  ORDER BY e.fecha_registro DESC";
-        
+          FROM estudiantes e 
+          LEFT JOIN login l ON e.id_usuario = l.id 
+          WHERE (e.folio LIKE :term1 
+               OR e.matricula LIKE :term2 
+               OR e.nombre LIKE :term3
+               OR l.nombre_completo LIKE :term4)
+          ORDER BY e.fecha_registro DESC";
+
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':term1', $searchPattern);
         $stmt->bindParam(':term2', $searchPattern);
         $stmt->bindParam(':term3', $searchPattern);
+        $stmt->bindParam(':term4', $searchPattern);
         $stmt->execute();
         
         $results = $stmt->fetchAll();
