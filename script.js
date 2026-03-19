@@ -41,7 +41,6 @@ let estudiantes = [];
 
 // Variables globales
 let currentPage = 'dashboard';
-let nextFolio = 1;
 let estadoChart = null;
 let ingresosChart = null;
 let currentEditIndex = -1;
@@ -134,6 +133,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initializeCSVHandlers();
     updatePaymentTypePreview();
+
+    // Auto-completar datos de estudiantes conocidos
+    const matriculaInput = document.getElementById('matricula');
+    if (matriculaInput) {
+        matriculaInput.addEventListener('blur', function() {
+            const matricula = this.value.trim();
+            const estudiante = estudiantes.find(e => e.matricula === matricula);
+            if (estudiante) {
+                document.getElementById('nombre').value = estudiante.nombre;
+                document.getElementById('carrera').value = estudiante.carrera;
+                updateResumen();
+            }
+        });
+    }
 });
 
 // Navegación entre páginas
@@ -904,41 +917,6 @@ function formatDate(dateString) {
         day: '2-digit'
     });
 }
-
-function generateFolio(number) {
-    return `No.${String(number).padStart(4, '0')}`;
-}
-
-// Auto-completar datos de estudiantes conocidos
-document.addEventListener('DOMContentLoaded', function() {
-    const matriculaInput = document.getElementById('matricula');
-    
-    if (matriculaInput) {
-        matriculaInput.addEventListener('blur', function() {
-            const matricula = this.value.trim();
-            const estudiante = estudiantes.find(e => e.matricula === matricula);
-            
-            if (estudiante) {
-                document.getElementById('nombre').value = estudiante.nombre;
-                document.getElementById('carrera').value = estudiante.carrera;
-                updateResumen();
-            }
-        });
-    }
-
-    
-});
-
-// Exportar funciones para uso global
-window.bibliotecaSystem = {
-    navigateToPage,
-    realizarBusqueda,
-    registrarDevolucion,
-    updateDashboardStats,
-    generatePDF,
-    estudiantes,
-    loadStudents
-};
 
 // ===============================================
 // FUNCIONES PARA EDITAR, ELIMINAR Y PREVISUALIZAR PDF
