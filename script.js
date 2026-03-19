@@ -1288,11 +1288,10 @@ function generatePDFContent(doc, estudiante) {
 
 
 // Función helper para formatear fechas en el PDF
-function formatDateForPDF(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'numeric',
+function formatDateForPDF(date = new Date()) {
+    return new Date(date).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
         year: 'numeric'
     });
 }
@@ -1487,7 +1486,7 @@ function generateMonthlyPDF(data) {
         doc.setFontSize(8);
         doc.setTextColor(127, 140, 141);
         doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
-        doc.text(`Generado el ${formatDateForPDF(new Date().toISOString())}`, 190, 290, { align: 'right' });
+        doc.text(`Generado el ${formatDateForPDF()}`, 190, 290, { align: 'right' });
     }
     
     // Save PDF
@@ -1590,7 +1589,7 @@ function generateCareerPDF(data) {
         doc.setFontSize(8);
         doc.setTextColor(127, 140, 141);
         doc.text(`Página ${i} de ${pageCount}`, 105, 290, { align: 'center' });
-        doc.text(`Generado el ${formatDateForPDF(new Date().toISOString())}`, 190, 290, { align: 'right' });
+        doc.text(`Generado el ${formatDateForPDF()}`, 190, 290, { align: 'right' });
     }
     
     // Save PDF
