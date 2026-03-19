@@ -14,7 +14,8 @@ async function checkSession() {
         
         if (data.success && data.loggedIn) {
             currentUser = data.user;
-            console.log('Usuario logueado:', currentUser);
+            // Solo mostrar la página si hay sesión válida
+            document.querySelector('.container').style.display = 'flex';
             
             // Show user info in the interface (optional)
             updateUserDisplay();
@@ -663,10 +664,6 @@ async function createIngresosChart() {
         
         if (stats && stats.monthly) {
             adeudosPorMes = stats.monthly;
-        } else if (estudiantes.length === 0) {
-            // Datos de ejemplo si no hay datos reales
-            const datosEjemplo = [120, 85, 150, 95, 200, 175, 90, 160, 110, 140, 185, 130];
-            adeudosPorMes = datosEjemplo;
         } else {
             // Calcular desde datos locales
             estudiantes.forEach(estudiante => {
