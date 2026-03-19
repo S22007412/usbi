@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadStudents();
     initializeCharts();
     initializeReportsHandlers();
-    loadCarrerasForReports();
+    loadCarreras();
 
     initializeCSVHandlers();
     updatePaymentTypePreview();
@@ -1318,27 +1318,31 @@ function initializeReportsHandlers() {
 }
 
 // Load carreras for the dropdown
-async function loadCarrerasForReports() {
+async function loadCarreras() {
     try {
         const response = await apiRequest('carreras');
-        const carreraSelect = document.getElementById('carrera-select');
-        
-        if (carreraSelect && response.success) {
-            // Clear existing options except the first one
-            carreraSelect.innerHTML = '<option value="">Seleccionar carrera...</option>';
-            
-            // Add carreras to the select
-            response.data.forEach(carrera => {
-                if (carrera.activa) {
-                    const option = document.createElement('option');
-                    option.value = carrera.nombre;
-                    option.textContent = carrera.nombre;
-                    carreraSelect.appendChild(option);
-                }
-            });
+        if (!response.success) return;
+
+        const carreras = response.data.filter(c => c.activa);
+        const optionsHTML = '<option value="">Seleccionar carrera</option>' +
+            carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+
+        // Registro form
+        const carreraSelect = document.getElementById('carrera');
+        if (carreraSelect) carreraSelect.innerHTML = optionsHTML;
+
+        // Edit modal
+        const editCarreraSelect = document.getElementById('edit-carrera');
+        if (editCarreraSelect) editCarreraSelect.innerHTML = optionsHTML;
+
+        // Reports dropdown
+        const reportCarreraSelect = document.getElementById('carrera-select');
+        if (reportCarreraSelect) {
+            reportCarreraSelect.innerHTML = '<option value="">Seleccionar carrera...</option>' +
+                carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
         }
     } catch (error) {
-        console.error('Error loading carreras for reports:', error);
+        console.error('Error loading carreras:', error);
     }
 }
 
