@@ -179,7 +179,10 @@ function initializeNavigation() {
     const logoutItem = document.querySelector('.logout-item');
     if (logoutItem) {
         logoutItem.addEventListener('click', function() {
-            window.location.href = '/biblioteca/api/logout.php';
+            showToast('Cerrando sesión...', 'success');
+            setTimeout(() => {
+                window.location.href = '/biblioteca/api/logout.php';
+            }, 1500);
         });
     }
 }
@@ -393,13 +396,13 @@ async function registrarDevolucion() {
 
     // Validar campos requeridos
     if (!matricula || !nombre || !carrera) {
-        alert('Por favor, complete todos los campos requeridos');
+        showToast('Por favor, complete todos los campos requeridos', 'error');
         return;
     }
 
     // Validar monto (debe ser positivo o cero)
     if (montoAdeudo < 0) {
-        alert('El monto del adeudo no puede ser negativo');
+        showToast('El monto del adeudo no puede ser negativo', 'error');
         return;
     }
 
@@ -479,7 +482,7 @@ async function realizarBusqueda() {
     const searchTerm = document.getElementById('search-input').value.trim();
     
     if (!searchTerm) {
-        alert('Por favor, ingrese un término de búsqueda');
+        showToast('Por favor, ingrese un término de búsqueda', 'error');
         return;
     }
 
@@ -1012,13 +1015,13 @@ async function saveEditedStudent() {
     
     // Validar campos requeridos
     if (!folioInput || !matricula || !nombre || !carrera) {
-        alert('Por favor, complete todos los campos');
+        showToast('Por favor, complete todos los campos', 'error');
         return;
     }
     
     // Validar monto
     if (montoAdeudo < 0) {
-        alert('El monto del adeudo no puede ser negativo');
+        showToast('El monto del adeudo no puede ser negativo', 'error');
         return;
     }
 
@@ -1099,9 +1102,11 @@ async function confirmDeleteStudent() {
             updateDashboardStats();
             updateReportsStats();
             
-            // Cerrar modal
-            document.getElementById('deleteModal').style.display = 'none';
-            
+            // Cerrar modal con pequeño delay
+            setTimeout(() => {
+                document.getElementById('deleteModal').style.display = 'none';
+            }, 300);
+
             // Mostrar mensaje de confirmación
             showSuccessMessage(response.message, 'success');
         }
@@ -1350,7 +1355,7 @@ async function generateMonthlyReport() {
     const year = document.getElementById('year-select').value;
     
     if (!month || !year) {
-        alert('Por favor, seleccione mes y año');
+        showToast('Por favor, seleccione mes y año', 'error');
         return;
     }
     
@@ -1648,7 +1653,7 @@ async function generateCareerCSV() {
     const carrera = document.getElementById('carrera-select').value;
     
     if (!carrera) {
-        alert('Por favor, seleccione una carrera');
+        showToast('Por favor, seleccione una carrera', 'error');
         return;
     }
     
