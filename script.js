@@ -456,14 +456,7 @@ function clearForm() {
 // Búsqueda
 function initializeSearchHandlers() {
     const searchInput = document.getElementById('search-input');
-    const searchResult = document.getElementById('search-result');
     const buscarBtn = document.getElementById('buscar-btn');
-
-    // Actualizar término de búsqueda
-    searchInput.addEventListener('input', function() {
-        const term = this.value.trim();
-        searchResult.textContent = term || 'Ej. 0001, S22007409 o Juan Pérez';
-    });
 
     // Realizar búsqueda
     buscarBtn.addEventListener('click', function() {
@@ -545,6 +538,10 @@ function displaySearchResults(results, searchTerm) {
                         <div class="info-label">Estado</div>
                         <div class="info-value">${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `Adeudo: $${estudiante.adeudo.toFixed(2)}`}</div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label">Registrado por</div>
+                        <div class="info-value">${estudiante.registradoPor || 'Sistema'}</div>
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -556,11 +553,9 @@ function displaySearchResults(results, searchTerm) {
 function clearSearchResults() {
     const resultsSection = document.getElementById('results-section');
     const searchInput = document.getElementById('search-input');
-    const searchResult = document.getElementById('search-result');
     
     resultsSection.style.display = 'none';
     searchInput.value = '';
-    searchResult.textContent = 'Ej. 0001, S22007409, Juan Pérez o Ingeniero';
 }
 
 // Estadísticas
