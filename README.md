@@ -7,9 +7,9 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 ## Lista de Tareas
 
 - [x] Certificado HTTPS
-  - [x] Obtención de un certificado con Let's Encrypt
+  - [x] Obtener de un certificado con Let's Encrypt
   - [x] Modificar referencias al URL anterior
-  - [x] Configuración de Apache para la redirección
+  - [x] Configurar Apache para la redirección
 - [x] Login
   - [x] Página de login
   - [x] Conexión a la base de datos
@@ -24,18 +24,19 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 - [ ] Sistema de prueba del backend
   - [ ] Eliminar la funcionalidad de la tabla config
   - [ ] Añadir la tabla login
-  - [ ] Simplificar *dbtest.php*, *debug.php* y *phptest.php*
+  - [x] ~Simplificar *dbtest.php*, *debug.php* y *phptest.php*~
+  - [x] Eliminar *dbtest.php*, *debug.php* y *phptest.php*
 - [ ] Sistema
   - [ ] Arreglar la consistencia del nombre del proyecto en headers/menús
   - [x] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
-  - [ ] Acomodar el css del mensaje de inicio de sesión
+  - [x] Acomodar el css del mensaje de inicio de sesión
   - [x] Listar los nombres de carreras de forma dinámica
     - [x] Modal para Editar Estudiante
     - [x] Página de Registro de Estudiante  
-  - [ ] Quitar los datos de ejemplo
+  - [x] Quitar los datos de ejemplo
   - [ ] Mejorar los comentarios
   - [ ] Códigos de error
-  - [ ] Revisar la implementación de la zona horaria
+  - [x] Revisar la implementación de la zona horaria
   - [ ] Eliminar el código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
 - [ ] Bugfix
