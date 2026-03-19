@@ -39,6 +39,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [x] Revisar la implementación de la zona horaria
   - [ ] Eliminar el código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
+  - [ ] Confirmación al momento de cerrar sesión 
 - [ ] Bugfix
   - [x] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
@@ -50,6 +51,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] (Opcional) Guía de instalación en un entorno local
 - [x] Búsqueda
   - [x] Añadir el nombre de los ingenieros como filtro de búsqueda
+  - [ ] (Opcional) Añadir el nombre de la carrera como filtro de búsqueda
 - [ ] (Opcional) Extras
   - [ ] Eliminar *legacy code*
   - [ ] Poner bonito el repositorio
