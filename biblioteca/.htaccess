@@ -13,7 +13,6 @@ RewriteRule ^(.*)$ $1 [R=200,L]
 RewriteRule ^api/students/?$ api/students.php [L]
 RewriteRule ^api/stats/?$ api/stats.php [L]
 RewriteRule ^api/search/?$ api/search.php [L]
-RewriteRule ^api/config/?$ api/config.php [L]
 RewriteRule ^api/carreras/?$ api/carreras.php [L]
 RewriteRule ^api/reports/?$ api/reports.php [L]
 
