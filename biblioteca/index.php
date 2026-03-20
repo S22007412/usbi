@@ -81,13 +81,6 @@ header('Content-Type: text/html; charset=UTF-8');
         <div id="carreras-get-result"></div>
     </div>
 
-    <div class="endpoint">
-        <span class="method get">GET</span>
-        <strong>/api/config</strong> - Obtener configuración del sistema
-        <button class="test-btn" onclick="testEndpoint('config', 'GET')">Probar</button>
-        <div id="config-get-result"></div>
-    </div>
-
     <h2>📋 Información del Sistema</h2>
     <ul>
         <li><strong>Servidor:</strong> ubiuv.duckdns.org:3306</li>
@@ -116,8 +109,8 @@ header('Content-Type: text/html; charset=UTF-8');
                             <h5>Estado de las tablas:</h5>
                             <ul>
                                 <li>Estudiantes: ${result.tables.estudiantes}</li>
-                                <li>Configuración: ${result.tables.configuracion}</li>
                                 <li>Carreras: ${result.tables.carreras}</li>
+                                <li>Login: ${result.tables.login}</li>
                             </ul>
                         </div>
                     `;

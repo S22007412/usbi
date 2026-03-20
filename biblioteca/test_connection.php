@@ -17,9 +17,13 @@ try {
     $stmt->execute();
     $estudiantesExists = $stmt->fetch() !== false;
     
-    $stmt = $connection->prepare("SHOW TABLES LIKE 'configuracion'");
+    $stmt = $connection->prepare("SHOW TABLES LIKE 'login'");
     $stmt->execute();
-    $configExists = $stmt->fetch() !== false;
+    $loginExists = $stmt->fetch() !== false;
+    
+    $stmt = $connection->prepare("SELECT COUNT(*) as count FROM login");
+    $stmt->execute();
+    $loginCount = $stmt->fetch()['count'];
     
     $stmt = $connection->prepare("SHOW TABLES LIKE 'carreras'");
     $stmt->execute();
