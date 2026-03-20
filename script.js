@@ -16,9 +16,6 @@ async function checkSession() {
             currentUser = data.user;
             // Solo mostrar la página si hay sesión válida
             document.querySelector('.container').style.display = 'flex';
-            
-            // Show user info in the interface (optional)
-            updateUserDisplay();
         } else {
             // Not logged in, redirect to login
             window.location.href = '/login.html';
@@ -30,22 +27,14 @@ async function checkSession() {
     }
 }
 
-function updateUserDisplay() {
-    // You can add user info to the sidebar or header
-    // For now, just log it
-    console.log(`Bienvenido: ${currentUser.nombre_completo} (${currentUser.rol})`);
-}
-
 // Array de estudiantes - now loaded from database
 let estudiantes = [];
 
 // Variables globales
-let currentPage = 'dashboard';
 let estadoChart = null;
 let ingresosChart = null;
 let currentEditIndex = -1;
 let currentDeleteIndex = -1;
-let isLoading = false;
 
 // API Helper Functions
 async function apiRequest(endpoint, method = 'GET', data = null) {
@@ -75,22 +64,9 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     }
 }
 
-// Loading indicator functions
-function showLoading(message = 'Cargando...') {
-    isLoading = true;
-    // You can implement a loading spinner here
-    console.log(message);
-}
-
-function hideLoading() {
-    isLoading = false;
-    // Hide loading spinner
-}
-
 // Load students from database
 async function loadStudents() {
     try {
-        showLoading('Cargando estudiantes...');
         const response = await apiRequest('students');
         estudiantes.length = 0; // Clear array
         estudiantes.push(...response.data);
@@ -211,7 +187,6 @@ function navigateToPage(pageName) {
     const targetPage = document.getElementById(pageName);
     if (targetPage) {
         targetPage.classList.add('active');
-        currentPage = pageName;
 
         // UPDATE: Always update the active menu item
         updateActiveMenu(pageName);
@@ -399,8 +374,6 @@ function updatePaymentTypePreview() {
 }
 
 async function registrarDevolucion() {
-    if (isLoading) return;
-
     const matricula = document.getElementById('matricula').value.trim();
     const nombre = document.getElementById('nombre').value.trim();
     const carrera = document.getElementById('carrera').value;
@@ -420,8 +393,6 @@ async function registrarDevolucion() {
     }
 
     try {
-        showLoading('Registrando devolución...');
-
         const studentData = {
             matricula: matricula,
             nombre: nombre,
@@ -493,7 +464,6 @@ async function realizarBusqueda() {
     }
 
     try {
-        showLoading('Buscando...');
         const response = await apiRequest(`search?term=${encodeURIComponent(searchTerm)}`);
         displaySearchResults(response.data, searchTerm);
         hideLoading();
@@ -999,8 +969,6 @@ async function saveEditedStudent() {
     }
 
     try {
-        showLoading('Actualizando estudiante...');
-        
         const studentData = {
             id: estudiantes[currentEditIndex].id,
             folio: `No.${formatFolio(folioInput)}`,
@@ -1061,8 +1029,6 @@ async function confirmDeleteStudent() {
     const estudianteEliminado = estudiantes[currentDeleteIndex];
     
     try {
-        showLoading('Eliminando estudiante...');
-        
         const response = await apiRequest('students', 'DELETE', { 
             id: estudianteEliminado.id 
         });
@@ -1332,8 +1298,6 @@ async function generateMonthlyReport() {
     }
     
     try {
-        showLoading('Generando reporte mensual...');
-        
         const response = await apiRequest(`reports?type=monthly&month=${month}&year=${year}`);
         
         if (response.success) {
@@ -1358,8 +1322,6 @@ async function generateCareerReport() {
     }
     
     try {
-        showLoading('Generando reporte por carrera...');
-        
         const response = await apiRequest(`reports?type=career&carrera=${encodeURIComponent(carrera)}`);
         
         if (response.success) {
@@ -1604,8 +1566,6 @@ async function generateMonthlyCSV() {
     }
     
     try {
-        showLoading('Generando CSV mensual...');
-        
         const response = await apiRequest(`reports?type=monthly&month=${month}&year=${year}`);
         
         if (response.success) {
@@ -1630,8 +1590,6 @@ async function generateCareerCSV() {
     }
     
     try {
-        showLoading('Generando CSV por carrera...');
-        
         const response = await apiRequest(`reports?type=career&carrera=${encodeURIComponent(carrera)}`);
         
         if (response.success) {
