@@ -103,8 +103,8 @@ class StudentsAPI {
         // Handle folio generation
         $folio = $this->generateFolio($input['folio'] ?? null);
 
-        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, adeudo, tipo_pago, estado, hora_registro, id_usuario) 
-                 VALUES (:folio, :matricula, :nombre, :carrera, :adeudo, :tipo_pago, :estado, :hora_registro, :id_usuario)";
+        $query = "INSERT INTO estudiantes (folio, matricula, nombre, carrera, id_carrera, adeudo, tipo_pago, estado, hora_registro, id_usuario) 
+                  VALUES (:folio, :matricula, :nombre, :carrera, :id_carrera, :adeudo, :tipo_pago, :estado, :hora_registro, :id_usuario)";
 
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':folio', $folio);
@@ -118,6 +118,15 @@ class StudentsAPI {
 
         $hora_registro = date('H:i:s');
         $stmt->bindParam(':hora_registro', $hora_registro);
+
+        $carreraQuery = "SELECT id FROM carreras WHERE nombre = :nombre LIMIT 1";
+        $carreraStmt = $this->connection->prepare($carreraQuery);
+        $carreraStmt->bindParam(':nombre', $carrera);
+        $carreraStmt->execute();
+        $carreraResult = $carreraStmt->fetch();
+        $idCarrera = $carreraResult ? $carreraResult['id'] : null;
+
+        $stmt->bindParam(':id_carrera', $idCarrera);
 
         if ($stmt->execute()) {
             $studentId = $this->connection->lastInsertId();
@@ -198,8 +207,8 @@ class StudentsAPI {
         $folio = $input['folio'];
         
         $query = "UPDATE estudiantes SET folio = :folio, matricula = :matricula, nombre = :nombre, 
-                 carrera = :carrera, adeudo = :adeudo, tipo_pago = :tipo_pago, estado = :estado 
-                 WHERE id = :id";
+                  carrera = :carrera, id_carrera = :id_carrera, adeudo = :adeudo, tipo_pago = :tipo_pago, estado = :estado 
+                  WHERE id = :id";
         
         $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':id', $input['id']);
@@ -211,6 +220,15 @@ class StudentsAPI {
         $stmt->bindParam(':tipo_pago', $tipoPago);
         $stmt->bindParam(':estado', $estado);
         
+        $carreraQuery = "SELECT id FROM carreras WHERE nombre = :nombre LIMIT 1";
+        $carreraStmt = $this->connection->prepare($carreraQuery);
+        $carreraStmt->bindParam(':nombre', $carrera);
+        $carreraStmt->execute();
+        $carreraResult = $carreraStmt->fetch();
+        $idCarrera = $carreraResult ? $carreraResult['id'] : null;
+
+        $stmt->bindParam(':id_carrera', $idCarrera);
+
         if ($stmt->execute()) {
             sendJSONResponse([
                 'success' => true,
