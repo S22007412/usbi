@@ -168,10 +168,7 @@ function initializeNavigation() {
     const logoutItem = document.querySelector('.logout-item');
     if (logoutItem) {
         logoutItem.addEventListener('click', function() {
-            showToast('Cerrando sesión...', 'success');
-            setTimeout(() => {
-                window.location.href = '/biblioteca/api/logout.php';
-            }, 1500);
+            document.getElementById('logoutModal').style.display = 'block';
         });
     }
 }
@@ -927,6 +924,18 @@ function initializeModalHandlers() {
 
     // Botón de descarga en modal PDF
     document.getElementById('downloadPdf').addEventListener('click', downloadCurrentPDF);
+
+    // Botón del modal de cierre de sesión
+    document.getElementById('cancelLogout').addEventListener('click', () => {
+        document.getElementById('logoutModal').style.display = 'none';
+    });
+
+    document.getElementById('confirmLogout').addEventListener('click', () => {
+        showToast('Cerrando sesión...', 'success');
+        setTimeout(() => {
+            window.location.href = '/biblioteca/api/logout.php';
+        }, 1500);
+    });
 }
 
 // Función para editar estudiante

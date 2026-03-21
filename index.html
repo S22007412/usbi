@@ -554,6 +554,28 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación para Cerrar Sesión -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content confirm-modal">
+            <div class="modal-header">
+                <h2>Cerrar Sesión</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="confirm-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <p><strong>¿Estás seguro de que deseas cerrar sesión?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelLogout">Cancelar</button>
+                <button type="button" class="btn-danger" id="confirmLogout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notificaciones Toast -->
     <div class="toast-container" id="toast-container"></div>
 

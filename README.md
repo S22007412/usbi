@@ -19,11 +19,11 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [x] Incluir el nombre del ingenierio que registró la cuota
   - [ ] Acomodar el formato de los reportes .pdf
   - [ ] (Opcional) Reportes por Ingeniero
-- [ ] Base de Datos
-  - [ ] Añadir la id_carrera como clave foránea en la lista de registros
-- [ ] Sistema de prueba del backend
-  - [ ] Eliminar la funcionalidad de la tabla config
-  - [ ] Añadir la tabla login
+- [x] Base de Datos
+  - [x] Añadir la id_carrera como clave foránea en la lista de registros
+- [x] Sistema de prueba del backend
+  - [x] Eliminar la funcionalidad de la tabla config
+  - [x] Añadir la tabla login
   - [x] ~Simplificar *dbtest.php*, *debug.php* y *phptest.php*~
   - [x] Eliminar *dbtest.php*, *debug.php* y *phptest.php*
 - [ ] Sistema
@@ -39,7 +39,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [x] Revisar la implementación de la zona horaria
   - [ ] Eliminar el código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
-  - [ ] Confirmación al momento de cerrar sesión 
+  - [x] Añadir confirmación al momento de cerrar sesión
 - [ ] Bugfix
   - [x] Arreglar el *cold start loading*
   - [ ] Arreglar problemas de carga del dashboard
