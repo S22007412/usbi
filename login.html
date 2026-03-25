@@ -65,19 +65,10 @@
         </div>
     </div>
 
-    <button id="theme-toggle" aria-label="Cambiar modo oscuro">
-        <span class="material-symbols-outlined icon-sun">light_mode</span>
-        <span class="material-symbols-outlined icon-moon">dark_mode</span>
-    </button>
+    
 
     <script>
-        // Theme toggle
-        const toggleBtn = document.getElementById('theme-toggle');
-        const body = document.body;
         
-        toggleBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-        });
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
