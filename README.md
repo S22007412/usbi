@@ -6,7 +6,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ## Lista de Tareas
 
-- [] Generación de Reportes
+- [ ] Generación de Reportes
   - [ ] Acomodar el formato de los reportes .pdf
 - [ ] Sistema
   - [ ] Mejorar los comentarios
