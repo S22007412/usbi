@@ -1,5 +1,4 @@
-// Sistema de Control de Biblioteca - JavaScript with Backend API
-/* global Chart */
+// Sistema de Control de Adeudos - JavaScript with Backend API
 
 // API Configuration - Update this to your server's URL
 const API_BASE_URL = 'https://ubiuv.duckdns.org/biblioteca/api';

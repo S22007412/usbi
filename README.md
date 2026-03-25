@@ -1,4 +1,4 @@
-# Usbiblioteca
+# Sistema de Control de Adeudos - USBI
 
 Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de Servicios Bibliotecarios y de Información (USBI): Región Poza Rica - Tuxpan.
 
@@ -6,59 +6,23 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ## Lista de Tareas
 
-- [x] Certificado HTTPS
-  - [x] Obtener de un certificado con Let's Encrypt
-  - [x] Modificar referencias al URL anterior
-  - [x] Configurar Apache para la redirección
-- [x] Login
-  - [x] Página de login
-  - [x] Conexión a la base de datos
-  - [x] ~(Opcional) Oauth con cuenta de Microsoft~
-- [x] Generación de Reportes
-  - [x] Añadir el logo de la Universidad Veracruzana en los .pdf
-  - [x] Incluir el nombre del ingenierio que registró la cuota
+- [] Generación de Reportes
   - [ ] Acomodar el formato de los reportes .pdf
-  - [ ] (Opcional) Reportes por Ingeniero
-- [x] Base de Datos
-  - [x] Añadir la id_carrera como clave foránea en la lista de registros
-- [x] Sistema de prueba del backend
-  - [x] Eliminar la funcionalidad de la tabla config
-  - [x] Añadir la tabla login
-  - [x] ~Simplificar *dbtest.php*, *debug.php* y *phptest.php*~
-  - [x] Eliminar *dbtest.php*, *debug.php* y *phptest.php*
 - [ ] Sistema
-  - [ ] Arreglar la consistencia del nombre del proyecto en headers/menús
-  - [x] Acomodar el indicador de Registro Exitoso al momento de registrar una cuota
-  - [x] Acomodar el css del mensaje de inicio de sesión
-  - [x] Listar los nombres de carreras de forma dinámica
-    - [x] Modal para Editar Estudiante
-    - [x] Página de Registro de Estudiante  
-  - [x] Quitar los datos de ejemplo
   - [ ] Mejorar los comentarios
   - [ ] Códigos de error
-  - [x] Revisar la implementación de la zona horaria
   - [ ] Eliminar el código redundante
     - [ ] *Frontend sanitizing* vs *backend validation*
-  - [x] Añadir confirmación al momento de cerrar sesión
-- [ ] Bugfix
-  - [x] Arreglar el *cold start loading*
-  - [ ] Arreglar problemas de carga del dashboard
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
   - [ ] Documentación Técnica
     - [ ] Diagrama de la base de datos
     - [ ] Documentación de los API endpoints
-  - [ ] (Opcional) Guía de instalación en un entorno local
-- [x] Búsqueda
-  - [x] Añadir el nombre de los ingenieros como filtro de búsqueda
-  - [ ] (Opcional) Añadir el nombre de la carrera como filtro de búsqueda
 - [ ] (Opcional) Extras
-  - [ ] Eliminar *legacy code*
-  - [ ] Poner bonito el repositorio
+  - [ ] Añadir un indicador del usuario logueado
+  - [ ] Guía de instalación en un entorno local
   - [ ] Arreglar el README.md
     - [ ] Reflejar los cambios en la estructura del sistema
-  - [ ] Añadir un indicador del usuario logueado
-  - [x] ~Modo oscuro~
 
 ---
 
