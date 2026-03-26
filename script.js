@@ -1139,13 +1139,12 @@ function generatePDFContent(doc, estudiante) {
     doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
     
     // Línea separadora
-
     doc.setDrawColor(149, 165, 166);
     doc.line(20, 70, 190, 70);
   
     // Datos del estudiante
     let yPosition = 90;
-    const lineHeight = 18;  // INCREASED from 15 to 18 for more spacing
+    const lineHeight = 18;
     
     doc.setFontSize(12);
     doc.setTextColor(44, 62, 80);
@@ -1173,9 +1172,6 @@ function generatePDFContent(doc, estudiante) {
 
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
     
-    // FIXED: Add extra spacing before adeudo section
-    //yPosition += 15;  // Extra spacing
-    
     // Adeudo (destacado)
     if (estudiante.adeudo > 0) {
         doc.setFontSize(14);
@@ -1191,8 +1187,7 @@ function generatePDFContent(doc, estudiante) {
         doc.text('$0.00 pesos', 25, yPosition + 10);
     }
     
-    // FIXED: Add proper spacing before tipo de pago
-    yPosition += 25;  // Increased spacing from 10 to 25
+    yPosition += 30;
     
     // Tipo de pago
     doc.setFontSize(12);
@@ -1203,8 +1198,7 @@ function generatePDFContent(doc, estudiante) {
     const tipoPagoText = estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
     doc.text(tipoPagoText, 25, yPosition + 8);
     
-    // FIXED: Add spacing before información del recibo
-    yPosition += 25;  // Increased spacing
+    yPosition += 25;
     
     // Información del recibo
     doc.setFontSize(12);
@@ -1223,7 +1217,7 @@ function generatePDFContent(doc, estudiante) {
     yPosition = addField('Fecha de emisión', fechaEmision, yPosition);
     
     // Registrado por (Nombre del Ingeniero)
-    yPosition += 5; // Small spacing
+    yPosition += 5;
     
     const registradoPor = estudiante.registradoPor || currentUser?.nombre_completo || 'Sistema';
     yPosition = addField('Registrado por', registradoPor, yPosition);
@@ -1231,7 +1225,7 @@ function generatePDFContent(doc, estudiante) {
     // Footer
     doc.setFontSize(10);
     doc.setTextColor(127, 140, 141);
-    doc.text('Sistema de Control de Biblioteca', 105, 280, { align: 'center' });
+    doc.text('Sistema de Control de Adeudos', 105, 280, { align: 'center' });
     
     // Línea decorativa en el footer
     doc.setDrawColor(149, 165, 166);
