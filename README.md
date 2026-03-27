@@ -10,6 +10,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Refactorizar el código para hacerlo más legible
   - [ ] Arreglar la consistencia de los comentarios
   - [ ] Simplificar la función de notificaciones toasts
+  - [ ] Quitar los datos fallback, en updateReportsStats() (preferiblemente mostrar un mensaje de error)
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
   - [ ] Documentación Técnica
