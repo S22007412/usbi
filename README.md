@@ -6,20 +6,16 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ## Lista de Tareas
 
-- [ ] Generación de Reportes
-  - [x] Acomodar el formato de los reportes PDF
 - [ ] Sistema
-  - [ ] Mejorar los comentarios
-  - [ ] Códigos de error
-  - [ ] Eliminar el código redundante
-    - [ ] *Frontend sanitizing* vs *backend validation*
+  - [ ] Refactorizar el código para hacerlo más legible
+  - [ ] Arreglar la consistencia de los comentarios
+  - [ ] Simplificar la función de notificaciones toasts
 - [ ] Documentación del sistema
   - [ ] Manual del usuario
   - [ ] Documentación Técnica
     - [ ] Diagrama de la base de datos
     - [ ] Documentación de los API endpoints
 - [ ] (Opcional) Extras
-  - [ ] Añadir un indicador del usuario logueado
   - [ ] Guía de instalación en un entorno local
   - [ ] Arreglar el README.md
     - [ ] Reflejar los cambios en la estructura del sistema

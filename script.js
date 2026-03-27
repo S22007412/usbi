@@ -1,10 +1,28 @@
-// Sistema de Control de Adeudos - JavaScript with Backend API
+// Sistema de Control de Adeudos
 
-// API Configuration - Update this to your server's URL
+// ==================================
+// Configuración y variables globales
+// ==================================
+
+// URL base de la API del backend
 const API_BASE_URL = 'https://ubiuv.duckdns.org/biblioteca/api';
 
-// Check if user is logged in
+// Usuario actualmente logueado, se obtiene de la sesión
 let currentUser = null;
+
+// Lista de estudiantes cargados desde la base de datos
+let estudiantes = [];
+
+// Variables globales
+let estadoChart = null;         // Referencia a la gráfica de estados (sin/con adeudo)
+let ingresosChart = null;       // Referencia a la gráfica de adeudos por mes
+let currentEditIndex = -1;      // Índice del estudiante siendo editado en el modal 
+let currentDeleteIndex = -1;    // Índice del estudiante siendo eliminado en el modal 
+let currentPdfData = null;      // Datos del PDF actual
+
+// =============
+// AUTENTICACIÓN
+// =============
 
 async function checkSession() {
     try {
@@ -16,26 +34,21 @@ async function checkSession() {
             // Solo mostrar la página si hay sesión válida
             document.querySelector('.container').style.display = 'flex';
         } else {
-            // Not logged in, redirect to login
+            // Si no hay sesión iniciada, redirige al login
             window.location.href = '/login.html';
         }
     } catch (error) {
         console.error('Error checking session:', error);
-        // On error, redirect to login to be safe
+        // En caso de error, redirige al inicio de sesión
         window.location.href = '/login.html';
     }
 }
 
-// Array de estudiantes - now loaded from database
-let estudiantes = [];
+// ===
+// API
+// ===
 
-// Variables globales
-let estadoChart = null;
-let ingresosChart = null;
-let currentEditIndex = -1;
-let currentDeleteIndex = -1;
-
-// API Helper Functions
+// Funciones helper de la API
 async function apiRequest(endpoint, method = 'GET', data = null) {
     try {
         const config = {
@@ -63,36 +76,13 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     }
 }
 
-// Load students from database
-async function loadStudents() {
-    try {
-        const response = await apiRequest('students');
-        estudiantes.length = 0; // Clear array
-        estudiantes.push(...response.data);
-        updateDashboardStats();
-        updateReportsStats();
-        hideLoading();
-    } catch (error) {
-        hideLoading();
-        showErrorMessage('Error al cargar estudiantes: ' + error.message);
-        console.error('Error loading students:', error);
-    }
-}
-
-// Load statistics from database
-async function loadStatistics() {
-    try {
-        const response = await apiRequest('stats');
-        return response.data;
-    } catch (error) {
-        console.error('Error loading statistics:', error);
-        return null;
-    }
-}
+// ==============
+// Inicialización
+// ==============
 
 // Inicialización del sistema
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is logged in
+    // Checa si el usuario tiene la sesión iniciada
     checkSession();
 
     initializeNavigation();
@@ -100,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSearchHandlers();
     initializeModalHandlers();
     
-    // Load initial data
+    // Carga los datos iniciales
     loadStudents();
     initializeCharts();
     initializeReportsHandlers();
@@ -123,6 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// ==========
+// Navegación
+// ==========
 
 // Navegación entre páginas
 function initializeNavigation() {
@@ -172,7 +166,6 @@ function initializeNavigation() {
     }
 }
 
-
 function navigateToPage(pageName) {
     // Ocultar todas las páginas
     document.querySelectorAll('.page').forEach(page => {
@@ -184,7 +177,6 @@ function navigateToPage(pageName) {
     if (targetPage) {
         targetPage.classList.add('active');
 
-        // UPDATE: Always update the active menu item
         updateActiveMenu(pageName);
 
         // Acciones específicas por página
@@ -211,6 +203,70 @@ function updateActiveMenu(pageName) {
     });
 }
 
+// ==============
+// Carga de Datos
+// ==============
+
+// Cargar a los estudiantes desde la base de datos
+async function loadStudents() {
+    try {
+        const response = await apiRequest('students');
+        estudiantes.length = 0;
+        estudiantes.push(...response.data);
+        updateDashboardStats();
+        updateReportsStats();
+        hideLoading();
+    } catch (error) {
+        hideLoading();
+        showErrorMessage('Error al cargar estudiantes: ' + error.message);
+        console.error('Error loading students:', error);
+    }
+}
+
+// Cargar las estadísticas desde la base de datos
+async function loadStatistics() {
+    try {
+        const response = await apiRequest('stats');
+        return response.data;
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        return null;
+    }
+}
+
+// Cargar las carreras desde el menú desplegable
+async function loadCarreras() {
+    try {
+        const response = await apiRequest('carreras');
+        if (!response.success) return;
+
+        const carreras = response.data.filter(c => c.activa);
+        const optionsHTML = '<option value="">Seleccionar carrera</option>' +
+            carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+
+        // Formulario de Registro
+        const carreraSelect = document.getElementById('carrera');
+        if (carreraSelect) carreraSelect.innerHTML = optionsHTML;
+
+        // Modal de Edición
+        const editCarreraSelect = document.getElementById('edit-carrera');
+        if (editCarreraSelect) editCarreraSelect.innerHTML = optionsHTML;
+
+        // Menú desplegable en Reportes
+        const reportCarreraSelect = document.getElementById('carrera-select');
+        if (reportCarreraSelect) {
+            reportCarreraSelect.innerHTML = '<option value="">Seleccionar carrera...</option>' +
+                carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        }
+    } catch (error) {
+        console.error('Error loading carreras:', error);
+    }
+}
+
+// ======================
+// Formulario de Registro
+// ======================
+
 // Manejo de formularios
 function initializeFormHandlers() {
     const registrarBtn = document.getElementById('registrar-devolucion');
@@ -221,35 +277,23 @@ function initializeFormHandlers() {
             registrarDevolucion();
         });
     }
-    
-    // Add event listeners for live updates (only if elements exist)
+
+    // Agregar event listeners para actualizaciones en tiempo real (si estos existen)
     const matriculaInput = document.getElementById('matricula');
     const nombreInput = document.getElementById('nombre');
     const carreraInput = document.getElementById('carrera');
-    const montoInput = document.getElementById('monto-adeudo');
     const folioInput = document.getElementById('folio-manual');
+    const montoInput = document.getElementById('monto-adeudo');
     
-    if (matriculaInput) {
-        matriculaInput.addEventListener('input', updateResumen);
-    }
-    
-    if (nombreInput) {
-        nombreInput.addEventListener('input', updateResumen);
-    }
-    
-    if (carreraInput) {
-        carreraInput.addEventListener('change', updateResumen);
-    }
-    
+    if (matriculaInput) matriculaInput.addEventListener('input', updateResumen);
+    if (nombreInput) nombreInput.addEventListener('input', updateResumen);
+    if (carreraInput) carreraInput.addEventListener('change', updateResumen);
+    if (folioInput) folioInput.addEventListener('input', updateResumen);
     if (montoInput) {
         montoInput.addEventListener('input', function() {
             updatePaymentTypePreview();
             updateResumen();
         });
-    }
-    
-    if (folioInput) {
-        folioInput.addEventListener('input', updateResumen);
     }
 }
 
@@ -311,7 +355,6 @@ function updateResumen() {
     // Update payment type preview
     updatePaymentTypePreview();
 }
-
 
 function updatePaymentTypePreview() {
     const montoInput = document.getElementById('monto-adeudo');
@@ -404,7 +447,10 @@ function clearForm() {
     updateResumen();
 }
 
+// ========
 // Búsqueda
+// ========
+
 function initializeSearchHandlers() {
     const searchInput = document.getElementById('search-input');
     const buscarBtn = document.getElementById('buscar-btn');
@@ -508,7 +554,10 @@ function clearSearchResults() {
     searchInput.value = '';
 }
 
-// Estadísticas
+// =======================
+// Estadísticas y Gráficas
+// =======================
+
 function updateDashboardStats() {
     const totalDevoluciones = estudiantes.length;
     const sinAdeudo = estudiantes.filter(e => e.estado === 'sin_adeudo').length;
@@ -523,6 +572,80 @@ function updateDashboardStats() {
 
     // Actualizar tabla de estudiantes
     updateStudentsTable();
+}
+
+// Actualizar tabla de estudiantes
+function updateStudentsTable() {
+    const studentsTable = document.getElementById('students-table');
+    if (!studentsTable) return;
+
+    if (estudiantes.length === 0) {
+        studentsTable.innerHTML = `
+            <div class="table-row">
+                <div class="table-cell" style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
+                    No hay registros de devoluciones
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // FIXED: Sort by folio number descending (highest folio first - newest on top)
+    const sortedStudents = [...estudiantes].sort((a, b) => {
+        const folioA = parseInt(a.folio.replace('No.', ''));
+        const folioB = parseInt(b.folio.replace('No.', ''));
+        return folioB - folioA; // Descending order (newest first)
+    });
+    
+    studentsTable.innerHTML = sortedStudents.map((estudiante) => {
+        // Find the original index in the unsorted array
+        const originalIndex = estudiantes.findIndex(e => e.id === estudiante.id);
+        
+        return `
+        <div class="table-row">
+            <div class="table-cell">
+                <strong>${estudiante.folio}</strong>
+            </div>
+            <div class="table-cell">
+                <div>
+                    <div class="student-name">${estudiante.nombre}</div>
+                    <small class="student-matricula">${estudiante.matricula}</small>
+                </div>
+            </div>
+            <div class="table-cell">
+                ${estudiante.carrera}
+            </div>
+            <div class="table-cell">
+                <span class="payment-badge ${estudiante.tipoPago === 'efectivo' ? 'payment-efectivo' : 'payment-multa'}">
+                    ${estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada'}
+                </span>
+            </div>
+            <div class="table-cell">
+                <span class="status-badge ${estudiante.estado === 'sin_adeudo' ? 'status-sin-adeudo' : 'status-con-adeudo'}">
+                    ${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `$${estudiante.adeudo.toFixed(2)}`}
+                </span>
+            </div>
+            <div class="table-cell">
+                <small style="color: #64748b;">
+                    ${estudiante.registradoPor || 'Sistema'}
+                </small>
+            </div>
+            <div class="table-cell">
+                <div class="action-buttons">
+                    <button class="btn-edit" onclick="editStudent(${originalIndex})" title="Editar registro">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-pdf" onclick="previewPDF(${originalIndex})" title="Previsualizar comprobante PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="btn-delete" onclick="deleteStudent(${originalIndex})" title="Eliminar registro">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    }).join('');
 }
 
 async function updateReportsStats() {
@@ -551,7 +674,7 @@ async function updateReportsStats() {
     }
 }
 
-// Gráficos
+// Gráficas
 async function initializeCharts() {
     try {
         await createEstadoChart();
@@ -692,172 +815,9 @@ async function createIngresosChart() {
     }
 }
 
-// Error handling
-function showErrorMessage(message) {
-    console.error(message);
-    
-    // Create error element
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        <span>${message}</span>
-    `;
-
-    // Insert in the active page
-    const activePage = document.querySelector('.page.active');
-    if (activePage) {
-        const pageHeader = activePage.querySelector('.page-header');
-        if (pageHeader) {
-            pageHeader.appendChild(errorDiv);
-
-            // Remove after 8 seconds
-            setTimeout(() => {
-                if (errorDiv.parentNode) {
-                    errorDiv.parentNode.removeChild(errorDiv);
-                }
-            }, 8000);
-        }
-    }
-}
-
-// Mostrar mensajes toast de éxito y error 
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <span>${message}</span>
-    `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('hide');
-        toast.addEventListener('animationend', () => toast.remove());
-    }, 4000);
-}
-
-function showSuccessMessage(message) {
-    showToast(message, 'success');
-}
-
-function showErrorMessage(message) {
-    showToast(message, 'error');
-}
-
-// Actualizar tabla de estudiantes
-function updateStudentsTable() {
-    const studentsTable = document.getElementById('students-table');
-    if (!studentsTable) return;
-
-    if (estudiantes.length === 0) {
-        studentsTable.innerHTML = `
-            <div class="table-row">
-                <div class="table-cell" style="grid-column: 1 / -1; text-align: center; color: #6b7280;">
-                    No hay registros de devoluciones
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    // FIXED: Sort by folio number descending (highest folio first - newest on top)
-    const sortedStudents = [...estudiantes].sort((a, b) => {
-        const folioA = parseInt(a.folio.replace('No.', ''));
-        const folioB = parseInt(b.folio.replace('No.', ''));
-        return folioB - folioA; // Descending order (newest first)
-    });
-    
-    studentsTable.innerHTML = sortedStudents.map((estudiante) => {
-        // Find the original index in the unsorted array
-        const originalIndex = estudiantes.findIndex(e => e.id === estudiante.id);
-        
-        return `
-        <div class="table-row">
-            <div class="table-cell">
-                <strong>${estudiante.folio}</strong>
-            </div>
-            <div class="table-cell">
-                <div>
-                    <div class="student-name">${estudiante.nombre}</div>
-                    <small class="student-matricula">${estudiante.matricula}</small>
-                </div>
-            </div>
-            <div class="table-cell">
-                ${estudiante.carrera}
-            </div>
-            <div class="table-cell">
-                <span class="payment-badge ${estudiante.tipoPago === 'efectivo' ? 'payment-efectivo' : 'payment-multa'}">
-                    ${estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada'}
-                </span>
-            </div>
-            <div class="table-cell">
-                <span class="status-badge ${estudiante.estado === 'sin_adeudo' ? 'status-sin-adeudo' : 'status-con-adeudo'}">
-                    ${estudiante.estado === 'sin_adeudo' ? 'Sin Adeudo' : `$${estudiante.adeudo.toFixed(2)}`}
-                </span>
-            </div>
-            <div class="table-cell">
-                <small style="color: #64748b;">
-                    ${estudiante.registradoPor || 'Sistema'}
-                </small>
-            </div>
-            <div class="table-cell">
-                <div class="action-buttons">
-                    <button class="btn-edit" onclick="editStudent(${originalIndex})" title="Editar registro">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-pdf" onclick="previewPDF(${originalIndex})" title="Previsualizar comprobante PDF">
-                        <i class="fas fa-file-pdf"></i>
-                    </button>
-                    <button class="btn-delete" onclick="deleteStudent(${originalIndex})" title="Eliminar registro">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    }).join('');
-}
-
-
-
-// Función para generar PDF del comprobante
-function generatePDF(estudianteIndex) {
-    const estudiante = estudiantes[estudianteIndex];
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Generar contenido del PDF
-    generatePDFContent(doc, estudiante);
-    
-    // Guardar PDF
-    const fileName = `Comprobante_${estudiante.folio}_${estudiante.nombre.replace(/\s+/g, '_')}.pdf`;
-    doc.save(fileName);
-    
-    // Mostrar mensaje de confirmación
-    showSuccessMessage(
-        `Comprobante PDF generado exitosamente para ${estudiante.nombre} (${estudiante.folio})`,
-        'success'
-    );
-}
-
-// Funciones de utilidad
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
-}
-
-// ===============================================
-// FUNCIONES PARA EDITAR, ELIMINAR Y PREVISUALIZAR PDF
-// ===============================================
+// =======
+// Modales
+// =======
 
 // Inicializar manejadores de modales
 function initializeModalHandlers() {
@@ -960,7 +920,7 @@ async function saveEditedStudent() {
         const response = await apiRequest('students', 'PUT', studentData);
         
         if (response.success) {
-            // Update local array
+            // Actualizar el array local
             estudiantes[currentEditIndex] = {
                 ...estudiantes[currentEditIndex],
                 ...studentData,
@@ -1038,8 +998,9 @@ async function confirmDeleteStudent() {
     currentDeleteIndex = -1;
 }
 
-// Variable para guardar los datos del PDF actual
-let currentPdfData = null;
+// ================
+// Comprobantes PDF
+// ================
 
 // Función para previsualizar PDF
 function previewPDF(index) {
@@ -1088,7 +1049,6 @@ function downloadCurrentPDF() {
 
 // Función para generar contenido del PDF (reutilizable)
 function generatePDFContent(doc, estudiante) {
-
     // Logo de la Universidad Veracruzana
     const logo = new Image();
     logo.src = "assets/logo_uv.png";
@@ -1188,21 +1148,31 @@ function generatePDFContent(doc, estudiante) {
     doc.text('Sistema de Control de Adeudos — Biblioteca USBI', 105, 276, { align: 'center' });
 }
 
-
-// Función helper para formatear fechas en el PDF
-function formatDateForPDF(date = new Date()) {
-    return new Date(date).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
+// Función para generar PDF del comprobante
+function generatePDF(estudianteIndex) {
+    const estudiante = estudiantes[estudianteIndex];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Generar contenido del PDF
+    generatePDFContent(doc, estudiante);
+    
+    // Guardar PDF
+    const fileName = `Comprobante_${estudiante.folio}_${estudiante.nombre.replace(/\s+/g, '_')}.pdf`;
+    doc.save(fileName);
+    
+    // Mostrar mensaje de confirmación
+    showSuccessMessage(
+        `Comprobante PDF generado exitosamente para ${estudiante.nombre} (${estudiante.folio})`,
+        'success'
+    );
 }
 
-// ===============================================
-// PDF REPORTS FUNCTIONALITY
-// ===============================================
+// ============
+// Reportes PDF
+// ============
 
-// Initialize reports handlers
+// Inicializar handlers de los reportes
 function initializeReportsHandlers() {
     const monthlyReportBtn = document.getElementById('generate-monthly-report');
     const careerReportBtn = document.getElementById('generate-career-report');
@@ -1213,35 +1183,6 @@ function initializeReportsHandlers() {
     
     if (careerReportBtn) {
         careerReportBtn.addEventListener('click', generateCareerReport);
-    }
-}
-
-// Load carreras for the dropdown
-async function loadCarreras() {
-    try {
-        const response = await apiRequest('carreras');
-        if (!response.success) return;
-
-        const carreras = response.data.filter(c => c.activa);
-        const optionsHTML = '<option value="">Seleccionar carrera</option>' +
-            carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-
-        // Registro form
-        const carreraSelect = document.getElementById('carrera');
-        if (carreraSelect) carreraSelect.innerHTML = optionsHTML;
-
-        // Edit modal
-        const editCarreraSelect = document.getElementById('edit-carrera');
-        if (editCarreraSelect) editCarreraSelect.innerHTML = optionsHTML;
-
-        // Reports dropdown
-        const reportCarreraSelect = document.getElementById('carrera-select');
-        if (reportCarreraSelect) {
-            reportCarreraSelect.innerHTML = '<option value="">Seleccionar carrera...</option>' +
-                carreras.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
-        }
-    } catch (error) {
-        console.error('Error loading carreras:', error);
     }
 }
 
@@ -1294,7 +1235,7 @@ async function generateCareerReport() {
     }
 }
 
-// Generate monthly PDF
+// Generar PDF mensual
 function generateMonthlyPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -1392,7 +1333,7 @@ function generateMonthlyPDF(data) {
     doc.save(fileName);
 }
 
-// Generate career PDF
+// Generate PDF por carrera
 function generateCareerPDF(data) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -1495,11 +1436,11 @@ function generateCareerPDF(data) {
     doc.save(fileName);
 }
 
-// ===============================================
-// CSV EXPORT FUNCTIONALITY
-// ===============================================
+// ========================
+// Exportar reportes en CSV
+// ========================
 
-// Initialize CSV handlers
+// Inicializar handlers de los CSV 
 function initializeCSVHandlers() {
     const monthlyCsvBtn = document.getElementById('generate-monthly-csv');
     const careerCsvBtn = document.getElementById('generate-career-csv');
@@ -1513,7 +1454,7 @@ function initializeCSVHandlers() {
     }
 }
 
-// Generate Monthly CSV
+// Generar CSV mensual
 async function generateMonthlyCSV() {
     const month = document.getElementById('month-select').value;
     const year = document.getElementById('year-select').value;
@@ -1538,7 +1479,7 @@ async function generateMonthlyCSV() {
     }
 }
 
-// Generate Career CSV
+// Generar CSV por carrera
 async function generateCareerCSV() {
     const carrera = document.getElementById('carrera-select').value;
     
@@ -1562,9 +1503,9 @@ async function generateCareerCSV() {
     }
 }
 
-// Download CSV helper function
+// Función para la descarga de los CSV
 function downloadCSV(students, filename, type) {
-    // CSV Headers
+    // Headers CSV
     const headers = ['Folio', 'Matrícula', 'Nombre', 'Carrera', 'Cuota', 'Tipo de Pago', 'Estado', 'Fecha', 'Hora'];
 
     // Build CSV content
@@ -1574,7 +1515,7 @@ function downloadCSV(students, filename, type) {
         const row = [
             student.folio,
             student.matricula,
-            `"${student.nombre}"`, // Quotes for names with commas
+            `"${student.nombre}"`,  // Quotes for names with commas
             `"${student.carrera}"`, // Quotes for career names
             student.adeudo.toFixed(2),
             student.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada',
@@ -1611,4 +1552,84 @@ function downloadCSV(students, filename, type) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+// ==========
+// Utilidades
+// ==========
+
+// Mostrar mensajes toast de éxito y error 
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('hide');
+        toast.addEventListener('animationend', () => toast.remove());
+    }, 4000);
+}
+
+// Función helper para formatear fechas en el PDF
+function formatDateForPDF(date = new Date()) {
+    return new Date(date).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+}
+
+// Funciones de utilidad
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
+// Error handling
+function showErrorMessage(message) {
+    console.error(message);
+    
+    // Create error element
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <span>${message}</span>
+    `;
+
+    // Insert in the active page
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+        const pageHeader = activePage.querySelector('.page-header');
+        if (pageHeader) {
+            pageHeader.appendChild(errorDiv);
+
+            // Remove after 8 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 8000);
+        }
+    }
+}
+
+function showSuccessMessage(message) {
+    showToast(message, 'success');
+}
+
+function showErrorMessage(message) {
+    showToast(message, 'error');
 }
