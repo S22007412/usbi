@@ -1120,116 +1120,100 @@ function generatePDFContent(doc, estudiante) {
 
     // Logo de la Universidad Veracruzana
     const logo = new Image();
-    logo.src = "assets\\logo_uv.png";
-    doc.addImage(logo, "PNG", 20, 10, 40, 40);
+    logo.src = "assets/logo_uv.png";
+    doc.addImage(logo, "PNG", 15, 8, 30, 30);
 
-    // Configuración de fuentes y colores
     doc.setFont("helvetica");
 
     // Header
-    doc.setFontSize(20);
+    doc.setFontSize(18);
     doc.setTextColor(44, 62, 80);
-    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 30, { align: 'center' });
-    
-    doc.setFontSize(16);
-    doc.text('COMPROBANTE DE PAGO', 105, 45, { align: 'center' });
-    
-    doc.setFontSize(14);
+    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 20, { align: 'center' });
+
+    doc.setFontSize(13);
+    doc.text('COMPROBANTE DE PAGO', 105, 30, { align: 'center' });
+
+    doc.setFontSize(11);
     doc.setTextColor(52, 73, 94);
-    doc.text(`Folio ${estudiante.folio}`, 105, 60, { align: 'center' });
-    
+    doc.text(`Folio ${estudiante.folio}`, 105, 40, { align: 'center' });
+
     // Línea separadora
     doc.setDrawColor(149, 165, 166);
-    doc.line(20, 70, 190, 70);
-  
+    doc.line(20, 48, 190, 48);
+
     // Datos del estudiante
-    let yPosition = 90;
-    const lineHeight = 18;
-    
-    doc.setFontSize(12);
+    let yPosition = 60;
+    const lineHeight = 14;
+
+    doc.setFontSize(11);
     doc.setTextColor(44, 62, 80);
-    
-    // Función helper para añadir campo
+
     const addField = (label, value, y) => {
         doc.setFont("helvetica", "bold");
         doc.text(`${label}:`, 25, y);
         doc.setFont("helvetica", "normal");
-        doc.text(value, 25, y + 8);
+        doc.text(value, 25, y + 6);
         return y + lineHeight;
     };
-    
+
     yPosition = addField('Matrícula', estudiante.matricula, yPosition);
     yPosition = addField('Estudiante', estudiante.nombre, yPosition);
     yPosition = addField('Carrera', estudiante.carrera, yPosition);
-    
-    // Hora de registro
-    const horaRegistro = estudiante.horaRegistro || new Date().toLocaleTimeString('es-ES', { 
+
+    const horaRegistro = estudiante.horaRegistro || new Date().toLocaleTimeString('es-ES', {
         timeZone: 'America/Mexico_City',
-        hour: '2-digit', 
-        minute: '2-digit', 
+        hour: '2-digit',
+        minute: '2-digit',
         second: '2-digit'
     });
-
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
-    
-    // Adeudo (destacado)
+
+    yPosition += 4;
+
+    // Monto
     if (estudiante.adeudo > 0) {
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setTextColor(231, 76, 60);
         doc.setFont("helvetica", "bold");
         doc.text('MONTO DE LA CUOTA:', 25, yPosition);
-        doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 10);
+        doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 7);
     } else {
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setTextColor(39, 174, 96);
         doc.setFont("helvetica", "bold");
         doc.text('PAGO SIN ADEUDO', 25, yPosition);
-        doc.text('$0.00 pesos', 25, yPosition + 10);
+        doc.text('$0.00 pesos', 25, yPosition + 7);
     }
-    
-    yPosition += 30;
-    
-    // Tipo de pago
-    doc.setFontSize(12);
+
+    yPosition += 18;
+
+    // Tipo de pago, recibo, fecha, registrado por
+    doc.setFontSize(11);
     doc.setTextColor(44, 62, 80);
-    doc.setFont("helvetica", "bold");
-    doc.text('Tipo de Pago:', 25, yPosition);
-    doc.setFont("helvetica", "normal");
+
     const tipoPagoText = estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
-    doc.text(tipoPagoText, 25, yPosition + 8);
-    
-    yPosition += 25;
-    
-    // Información del recibo
-    doc.setFontSize(12);
-    doc.setTextColor(44, 62, 80);
-    doc.setFont("helvetica", "normal");
-    
+    yPosition = addField('Tipo de Pago', tipoPagoText, yPosition);
     yPosition = addField('Número de recibo', estudiante.folio.replace('No.', ''), yPosition);
-    
+
     const fechaEmision = new Intl.DateTimeFormat('es-ES', {
         timeZone: 'America/Mexico_City',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
     }).format(new Date());
-
     yPosition = addField('Fecha de emisión', fechaEmision, yPosition);
-    
-    // Registrado por (Nombre del Ingeniero)
-    yPosition += 5;
-    
+
     const registradoPor = estudiante.registradoPor || currentUser?.nombre_completo || 'Sistema';
     yPosition = addField('Registrado por', registradoPor, yPosition);
-    
-    // Footer
-    doc.setFontSize(10);
-    doc.setTextColor(127, 140, 141);
-    doc.text('Sistema de Control de Adeudos', 105, 280, { align: 'center' });
-    
+
     // Línea decorativa en el footer
     doc.setDrawColor(149, 165, 166);
-    doc.line(20, 270, 190, 270);
+    doc.line(20, yPosition + 8, 190, yPosition + 8);
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(127, 140, 141);
+    doc.text('Sistema de Control de Adeudos — Biblioteca USBI', 105, yPosition + 15, { align: 'center' });
 }
 
 
@@ -1289,7 +1273,7 @@ async function loadCarreras() {
     }
 }
 
-// Generate monthly report
+// Generar reporte mensual
 async function generateMonthlyReport() {
     const month = document.getElementById('month-select').value;
     const year = document.getElementById('year-select').value;
@@ -1314,7 +1298,7 @@ async function generateMonthlyReport() {
     }
 }
 
-// Generate career report
+// Generar reporte por carrera
 async function generateCareerReport() {
     const carrera = document.getElementById('carrera-select').value;
     
