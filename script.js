@@ -275,25 +275,6 @@ function getNextAvailableFolio() {
     return String(maxFolio + 1).padStart(4, '0');
 }
 
-// Función para validar folio único
-function validateFolioUnique(folio, excludeIndex = -1) {
-    return !estudiantes.some((estudiante, index) => 
-        estudiante.folio === `No.${folio}` && index !== excludeIndex
-    );
-}
-
-// Función para formatear folio
-function formatFolio(input) {
-    // Remover caracteres no numéricos
-    let numbers = input.replace(/\D/g, '');
-    
-    // Limitar a 4 dígitos
-    numbers = numbers.substring(0, 4);
-    
-    // Rellenar con ceros
-    return numbers.padStart(4, '0');
-}
-
 function updateResumen() {
     const matricula = document.getElementById('matricula').value;
     const nombre = document.getElementById('nombre').value;
@@ -324,17 +305,7 @@ function updateResumen() {
 
     // Mostrar folio (manual o automático)
     if (resumenFolioElement) {
-        if (folioManual && folioManual.trim()) {
-            const formattedFolio = formatFolio(folioManual.trim());
-            resumenFolioElement.textContent = formattedFolio;
-            
-            // Validar si es único
-            if (!validateFolioUnique(formattedFolio)) {
-                resumenFolioElement.innerHTML = `${formattedFolio} <span style="color: #ef4444; font-size: 12px;">(⚠️ DUPLICADO)</span>`;
-            }
-        } else {
-            resumenFolioElement.textContent = getNextAvailableFolio();
-        }
+        resumenFolioElement.textContent = folioManual?.trim() || getNextAvailableFolio();
     }
     
     // Update payment type preview
@@ -979,7 +950,7 @@ async function saveEditedStudent() {
     try {
         const studentData = {
             id: estudiantes[currentEditIndex].id,
-            folio: `No.${formatFolio(folioInput)}`,
+            folio: `No.${folioInput.padStart(4, '0')}`,
             matricula: matricula,
             nombre: nombre,
             carrera: carrera,
@@ -1148,7 +1119,7 @@ function generatePDFContent(doc, estudiante) {
     doc.setTextColor(44, 62, 80);
 
     const addField = (label, value, y) => {
-        doc.setFontSize(11);
+        doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text(`${label}:`, 25, y);
         doc.setFontSize(14);
