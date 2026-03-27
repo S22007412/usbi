@@ -1121,38 +1121,39 @@ function generatePDFContent(doc, estudiante) {
     // Logo de la Universidad Veracruzana
     const logo = new Image();
     logo.src = "assets/logo_uv.png";
-    doc.addImage(logo, "PNG", 15, 8, 30, 30);
+    doc.addImage(logo, "PNG", 15, 8, 35, 35);
 
     doc.setFont("helvetica");
 
     // Header
-    doc.setFontSize(18);
+    doc.setFontSize(20);
     doc.setTextColor(44, 62, 80);
-    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 20, { align: 'center' });
+    doc.text('BIBLIOTECA UNIVERSITARIA', 105, 22, { align: 'center' });
+
+    doc.setFontSize(15);
+    doc.text('COMPROBANTE DE PAGO', 105, 33, { align: 'center' });
 
     doc.setFontSize(13);
-    doc.text('COMPROBANTE DE PAGO', 105, 30, { align: 'center' });
-
-    doc.setFontSize(11);
     doc.setTextColor(52, 73, 94);
-    doc.text(`Folio ${estudiante.folio}`, 105, 40, { align: 'center' });
+    doc.text(`Folio ${estudiante.folio}`, 105, 43, { align: 'center' });
 
     // Línea separadora
     doc.setDrawColor(149, 165, 166);
-    doc.line(20, 48, 190, 48);
+    doc.line(20, 50, 190, 50);
 
     // Datos del estudiante
-    let yPosition = 60;
-    const lineHeight = 14;
+    let yPosition = 65;
+    const lineHeight = 20;
 
-    doc.setFontSize(11);
     doc.setTextColor(44, 62, 80);
 
     const addField = (label, value, y) => {
+        doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         doc.text(`${label}:`, 25, y);
+        doc.setFontSize(14);
         doc.setFont("helvetica", "normal");
-        doc.text(value, 25, y + 6);
+        doc.text(value, 25, y + 8);
         return y + lineHeight;
     };
 
@@ -1168,7 +1169,7 @@ function generatePDFContent(doc, estudiante) {
     });
     yPosition = addField('Hora de registro', horaRegistro, yPosition);
 
-    yPosition += 4;
+    yPosition += 6;
 
     // Monto
     if (estudiante.adeudo > 0) {
@@ -1176,19 +1177,20 @@ function generatePDFContent(doc, estudiante) {
         doc.setTextColor(231, 76, 60);
         doc.setFont("helvetica", "bold");
         doc.text('MONTO DE LA CUOTA:', 25, yPosition);
-        doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 7);
+        doc.setFontSize(14);
+        doc.text(`$${estudiante.adeudo.toFixed(2)} pesos`, 25, yPosition + 9);
     } else {
         doc.setFontSize(12);
         doc.setTextColor(39, 174, 96);
         doc.setFont("helvetica", "bold");
         doc.text('PAGO SIN ADEUDO', 25, yPosition);
-        doc.text('$0.00 pesos', 25, yPosition + 7);
+        doc.setFontSize(14);
+        doc.text('$0.00 pesos', 25, yPosition + 9);
     }
 
-    yPosition += 18;
+    yPosition += 22;
 
     // Tipo de pago, recibo, fecha, registrado por
-    doc.setFontSize(11);
     doc.setTextColor(44, 62, 80);
 
     const tipoPagoText = estudiante.tipoPago === 'efectivo' ? 'Efectivo' : 'Multa Cancelada';
@@ -1206,14 +1208,13 @@ function generatePDFContent(doc, estudiante) {
     const registradoPor = estudiante.registradoPor || currentUser?.nombre_completo || 'Sistema';
     yPosition = addField('Registrado por', registradoPor, yPosition);
 
-    // Línea decorativa en el footer
+    // Footer fijo al final del documento
     doc.setDrawColor(149, 165, 166);
-    doc.line(20, yPosition + 8, 190, yPosition + 8);
+    doc.line(20, 268, 190, 268);
 
-    // Footer
-    doc.setFontSize(9);
+    doc.setFontSize(10);
     doc.setTextColor(127, 140, 141);
-    doc.text('Sistema de Control de Adeudos — Biblioteca USBI', 105, yPosition + 15, { align: 'center' });
+    doc.text('Sistema de Control de Adeudos — Biblioteca USBI', 105, 276, { align: 'center' });
 }
 
 
