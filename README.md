@@ -20,6 +20,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
   - [ ] Guía de instalación en un entorno local
   - [ ] Arreglar el README.md
     - [ ] Reflejar los cambios en la estructura del sistema
+    - [ ] Agregar las capturas de pantalla
 
 ---
 
@@ -57,7 +58,7 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 - [Instalación y Configuración](#-instalación-y-configuración)
 - [Uso del Sistema](#-uso-del-sistema)
 - [Capturas de Pantalla](#-capturas-de-pantalla)
-- [Autor](#-autor)
+- [Autores](#-autores)
 
 ---
 
@@ -117,31 +118,31 @@ Cuando un estudiante devuelve un libro fuera de la fecha límite, se genera un a
 El sistema sigue una arquitectura **cliente-servidor** con separación clara de responsabilidades:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     🖥️  FRONTEND                            │
-│  ┌───────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐   │
-│  │index.html │  │login.html│  │styles.css│  │ script.js │   │
-│  │ (SPA)     │  │          │  │login.css │  │           │   │
-│  └────┬──────┘  └──────────┘  └──────────┘  └─────┬─────┘   │
-│       │              Navegación SPA               │         │
-│       └──────────────── Fetch API ────────────────┘         │
-└───────────────────────────┬─────────────────────────────────┘
-                            │ HTTP (JSON)
-┌───────────────────────────▼─────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────┐
+│                     🖥️  FRONTEND                             │
+│  ┌────────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐   │
+│  │ index.html │  │login.html│  │styles.css│  │ script.js │   │
+│  │   (SPA)    │  │          │  │login.css │  │           │   │
+│  └─────┬──────┘  └──────────┘  └──────────┘  └─────┬─────┘   │
+│        │              Navegación SPA               │         │
+│        └──────────────── Fetch API ────────────────┘         │
+└─────────────────────────────┬────────────────────────────────┘
+                              │ HTTP (JSON)
+┌─────────────────────────────▼───────────────────────────────┐
 │                     ⚙️  BACKEND (PHP)                       │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │                    /biblioteca/api/                    │ │
 │  │  students.php │ search.php │ stats.php │ reports.php   │ │
 │  │  carreras.php │ config.php                             │ │
-│  └────────────────────────┬───────────────────────────────┘ │
-│  ┌────────────────────────▼───────────────────────────────┐ │
+│  └──────────────────────────┬─────────────────────────────┘ │
+│  ┌──────────────────────────▼─────────────────────────────┐ │
 │  │   /config/database.php   │   /includes/cors.php        │ │
 │  │                          │   /includes/validation.php  │ │
-│  └────────────────────────┬───────────────────────────────┘ │
-└───────────────────────────┬─────────────────────────────────┘
-                            │ PDO
-┌───────────────────────────▼─────────────────────────────────┐
-│                     🗄️  BASE DE DATOS (MySQL)               │
+│  └──────────────────────────┬─────────────────────────────┘ │
+└─────────────────────────────┬───────────────────────────────┘
+                              │ PDO
+┌─────────────────────────────▼───────────────────────────────┐
+│                   🗄️  BASE DE DATOS (MySQL)                 │
 │  Tablas: estudiantes │ carreras │ login                     │
 │  Vistas: vista_estadisticas │ vista_adeudos_por_mes         │
 │          vista_carreras_adeudos                             │
@@ -197,6 +198,17 @@ La base de datos `usbi` utiliza **MySQL 8.0** y se compone de las siguientes tab
 
 ### Tablas
 
+#### `carreras`
+Catálogo de las 52 carreras universitarias de la UV.
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | `INT` (PK, AI) | Identificador único |
+| `codigo` | `VARCHAR(10)` | Código abreviado de la carrera |
+| `nombre` | `VARCHAR(100)` | Nombre completo de la carrera |
+| `facultad` | `VARCHAR(100)` | Facultad a la que pertenece |
+| `activa` | `TINYINT(1)` | Estado activo/inactivo |
+
 #### `estudiantes`
 Tabla principal que almacena los registros de pagos de adeudos.
 
@@ -211,26 +223,18 @@ Tabla principal que almacena los registros de pagos de adeudos.
 | `estado` | `VARCHAR(20)` | `sin_adeudo` o `con_adeudo` |
 | `fecha_registro` | `DATETIME` | Fecha y hora del registro |
 | `hora_registro` | `TIME` | Hora del registro |
+| `id_usuario` | `INT` | Identificador del usuario que registra |
+| `id_carrera` | `INT` | Identificador de la carrera |
 
-#### `carreras`
-Catálogo de las 52 carreras universitarias de la UV.
+#### `login`
+Tabla que almacena los usuarios con acceso al sistema.
 
 | Campo | Tipo | Descripción |
 |---|---|---|
 | `id` | `INT` (PK, AI) | Identificador único |
-| `codigo` | `VARCHAR(10)` | Código abreviado de la carrera |
-| `nombre` | `VARCHAR(100)` | Nombre completo de la carrera |
-| `facultad` | `VARCHAR(100)` | Facultad a la que pertenece |
-| `activa` | `TINYINT(1)` | Estado activo/inactivo |
-
-#### `configuracion`
-Parámetros generales del sistema.
-
-| Campo | Tipo | Descripción |
-|---|---|---|
-| `clave` | `VARCHAR(50)` (PK) | Nombre del parámetro |
-| `valor` | `TEXT` | Valor del parámetro |
-| `descripcion` | `TEXT` | Descripción del parámetro |
+| `usuario` | `VARCHAR(40)` | Nombre de usuario para el login |
+| `constrasena` | `VARCHAR(50)` | Contraseña para el login |
+| `nombre_completo` | `VARCHAR(100)` | Nombre completo del usuario |
 
 ### Vistas SQL
 
@@ -260,7 +264,6 @@ const API_BASE_URL = 'http://ubiuv.duckdns.org/biblioteca/api';
 | `GET` | `/stats.php` | Obtener estadísticas generales |
 | `GET` | `/reports.php` | Obtener datos para reportes |
 | `GET` | `/carreras.php` | Listar todas las carreras disponibles |
-| `GET` | `/config.php` | Obtener configuración del sistema |
 
 ---
 
@@ -363,15 +366,13 @@ Escribe en el campo de búsqueda:
 
 ---
 
-## 👤 Autor
+## 👤 Autores
 
-**Eder Salas**
-**Luna Valeria**
-**Ismael**
-**Jaquisex**
-**Polola**
-
-- GitHub: [@Eder-Salas](https://github.com/Eder-Salas)
+- [**Jaqueline González Solís**](https://github.com/Paolad04)
+- [**Paola Dexiree González Hernández**](https://github.com/Paolad04)
+- [**Ismael Mendez Guzmán**](https://github.com/ismal21)
+- [**Eder Gael Salas Torres**](https://github.com/Eder-Salas)
+- [**José Aan Sotelo Meseguer**](https://github.com/S22007412)
 
 ---
 
