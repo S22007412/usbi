@@ -336,7 +336,40 @@ Escribe en el campo de búsqueda:
 
 ## 📸 Capturas de Pantalla
 
-> *Las capturas de pantalla se agregarán próximamente.*
+
+![Login del sistema](images/login.png)
+
+Pantalla de inicio de sesión para administradores del sistema de control de adeudos de la USBI (UV).
+
+---
+### 🏠 Inicio / Dashboard
+
+![Dashboard](images/dashboard.png)
+
+Vista general del sistema donde se muestran estadísticas clave como total de registros, pagos realizados, adeudos pendientes e ingresos generados. 
+
+---
+
+### 💳 Pago de Cuotas
+
+![Pago de Cuotas](images/pago_cuotas.png)
+
+Formulario para registrar pagos de estudiantes. Incluye generación automática de folio, captura de datos del estudiante y cálculo del tipo de pago (efectivo o multa cancelada).
+
+---
+
+### 🔍 Búsqueda de Estudiantes
+
+![Búsqueda de Estudiantes](images/busqueda.png)
+
+Permite buscar estudiantes por folio, matrícula, nombre o ingeniero. Facilita la consulta rápida de información dentro del sistema.
+
+---
+### 📊 Reportes
+
+![Reportes](images/generar_reporte.png)
+
+Módulo para generar reportes en formato PDF o CSV por mes o por carrera. Permite exportar información para análisis y control administrativo.
 
 ---
 
