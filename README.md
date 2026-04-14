@@ -1,9 +1,5 @@
 # Sistema de Control de Adeudos - USBI
 
-Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de Servicios Bibliotecarios y de Información (USBI): Región Poza Rica - Tuxpan.
-
----
-
 <p align="center">
   <img src="https://img.icons8.com/color/96/library.png" alt="Logo Biblioteca" width="80"/>
 </p>
