@@ -1,5 +1,3 @@
-# Sistema de Control de Adeudos - USBI
-
 <p align="center">
   <img src="https://img.icons8.com/color/96/library.png" alt="Logo Biblioteca" width="80"/>
 </p>
