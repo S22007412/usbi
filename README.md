@@ -4,26 +4,6 @@ Sistema web para la gestión y registro de cuotas bibliotecarias en la Unidad de
 
 ---
 
-## Lista de Tareas
-
-- [ ] Sistema
-  - [ ] Refactorizar el código para hacerlo más legible
-  - [ ] Arreglar la consistencia de los comentarios
-  - [ ] Simplificar la función de notificaciones toasts
-  - [ ] Quitar los datos fallback, en updateReportsStats() (preferiblemente mostrar un mensaje de error)
-- [ ] Documentación del sistema
-  - [ ] Manual del usuario
-  - [ ] Documentación Técnica
-    - [ ] Diagrama de la base de datos
-    - [ ] Documentación de los API endpoints
-- [ ] (Opcional) Extras
-  - [ ] Guía de instalación en un entorno local
-  - [ ] Arreglar el README.md
-    - [ ] Reflejar los cambios en la estructura del sistema
-    - [ ] Agregar las capturas de pantalla
-
----
-
 <p align="center">
   <img src="https://img.icons8.com/color/96/library.png" alt="Logo Biblioteca" width="80"/>
 </p>
