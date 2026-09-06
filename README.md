@@ -255,7 +255,7 @@ const API_BASE_URL = 'http://ubiuv.duckdns.org/biblioteca/api';
 **1. Clonar el repositorio**
 
 ```bash
-git clone https://github.com/Eder-Salas/usbi.git
+git clone https://github.com/S22007412/usbi.git
 cd usbi
 ```
 
@@ -288,6 +288,14 @@ const API_BASE_URL = 'http://tu-servidor/biblioteca/api';
 **5. Configurar el servidor web**
 
 Asegúrate de que el directorio `biblioteca/` tenga permisos de lectura y que Apache tenga `mod_rewrite` activo.
+
+**Nota:** En caso de tener problemas con la API, añade esta línea en tu configuración de Apache
+
+```
+<Directory /var/www/html/biblioteca>
+  AllowOverride All
+</Directory>
+```
 
 **6. Acceder al sistema**
 
